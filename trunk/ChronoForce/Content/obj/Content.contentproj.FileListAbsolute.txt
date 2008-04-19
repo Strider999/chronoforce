@@ -1,1 +1,0 @@
-F:\XNA Projects\Games\ChronoForce\ChronoForce\Content\obj\x86\Debug\ResolveAssemblyReference.cache
