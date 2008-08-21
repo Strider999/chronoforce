@@ -1,7 +1,0 @@
-F:\XNA Projects\Games\ChronoForce\ChronoForceData\bin\Debug\ChronoForceData.dll
-F:\XNA Projects\Games\ChronoForce\ChronoForceData\bin\Debug\ChronoForceData.pdb
-F:\XNA Projects\Games\ChronoForce\ChronoForceData\obj\Debug\ResolveAssemblyReference.cache
-F:\XNA Projects\Games\ChronoForce\ChronoForceData\obj\Debug\ChronoForceData.dll
-F:\XNA Projects\Games\ChronoForce\ChronoForceData\obj\Debug\ChronoForceData.pdb
-F:\XNA Projects\Games\ChronoForce\ChronoForceData\bin\Debug\Microsoft.Xna.Framework.dll
-F:\XNA Projects\Games\ChronoForce\ChronoForceData\bin\Debug\Microsoft.Xna.Framework.xml
