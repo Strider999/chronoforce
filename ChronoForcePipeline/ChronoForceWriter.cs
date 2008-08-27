@@ -47,7 +47,7 @@ namespace ChronoForcePipline
                 // build the name of a non-templated type
                 readerText += "+" + shortTypeName + "Reader";
             }
-            readerText += ", ChronoForce";
+            readerText += ", ChronoForceData";
 
             // replace the suffix name on the Xbox 360
             // -- since the processor runs on Windows, it needs to reference 
@@ -70,7 +70,7 @@ namespace ChronoForcePipline
         {
             Type type = typeof(T);
 
-            string typeText = type.FullName + ", RolePlayingGameDataWindows";
+            string typeText = type.FullName + ", ChronoForceData";
 
             // replace the suffix name on the Xbox 360
             // -- since the processor runs on Windows, it needs to reference 

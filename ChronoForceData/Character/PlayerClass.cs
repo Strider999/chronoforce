@@ -7,7 +7,7 @@ namespace ChronoForceData.Character
     /// <summary>
     /// Main class for handling all player specific actions
     /// </summary>
-    public class PlayerClass : CharacterBase
+    public class PlayerClass : CombatCharacter
     {
         #region Fields
         // Abilities the character possesses for battle
@@ -184,7 +184,7 @@ namespace ChronoForceData.Character
         /// </summary>
         public void LevelUp()
         {
-
+ 
         }
     }
 }
