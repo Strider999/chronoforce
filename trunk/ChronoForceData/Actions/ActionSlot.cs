@@ -70,7 +70,7 @@ namespace ChronoForceData.Actions
         int damage = 0;
         // Wait time for commands that pause the action
         int waitTime;
-        // Counter for the amount of anation frames that passed
+        // Counter for the amount of animation frames that passed
         int actionFrame = 0;
         // Timer for the action
         int actionTimer;
@@ -78,6 +78,8 @@ namespace ChronoForceData.Actions
         bool isFinished = false;
         // True if the step size has been initialized
         bool stepInitialized = false;
+        // True if for movement, the endPosition is absolute.  Default is true.
+        bool absolutePosition = true;
         #endregion
 
         #region Events
@@ -102,6 +104,24 @@ namespace ChronoForceData.Actions
         #region Properties
 
         /// <summary>
+        /// Actor that will the slot will effect
+        /// </summary>
+        public CharacterBase Actor
+        {
+            get { return actor; }
+            set { actor = value; }
+        }
+
+        /// <summary>
+        /// How fast to animate the action in frames.  0 means instant.
+        /// </summary>
+        public int Speed
+        {
+            get { return speed; }
+            set { speed = value; }
+        }
+
+        /// <summary>
         /// Current position of the sprite if it is moving
         /// </summary>
         public Vector2 Position
@@ -110,11 +130,21 @@ namespace ChronoForceData.Actions
         }
 
         /// <summary>
-        /// Returns the action type this slot represents.
+        /// Destination position for the actor or effect
+        /// </summary>
+        public Vector2 EndPosition
+        {
+            get { return endPosition; }
+            set { endPosition = value; }
+        }
+
+        /// <summary>
+        /// Action type this slot represents.
         /// </summary>
         public ActionCommand Action
         {
             get { return actionType; }
+            set { actionType = value; }
         }
 
         /// <summary>
@@ -125,9 +155,28 @@ namespace ChronoForceData.Actions
             get { return isFinished; }
         }
 
+        /// <summary>
+        /// Determines whether or not to use absolute positioning
+        /// </summary>
+        public bool IsAbsolute
+        {
+            get { return absolutePosition; }
+            set { absolutePosition = value; }
+        }
+
         #endregion
 
         #region Initialization
+
+        /// <summary>
+        /// Blank constructor for an action that will be set later or reused.  The slot will
+        /// start in a finished state and Reset must be called to start it.
+        /// </summary>
+        public ActionSlot()
+        {
+            // Makes sure the slot doesn't do anything
+            isFinished = true;
+        }
 
         /// <summary>
         /// Constructor used mainly as a place holder for Begin and End commands.
@@ -186,6 +235,22 @@ namespace ChronoForceData.Actions
         }
 
         /// <summary>
+        /// Action constructor for movement commands.
+        /// </summary>
+        /// <param name="action">Action type for moving the actor through battle</param>
+        /// <param name="actor">Player in this action</param>
+        /// <param name="endPosition">Ending position for a moving sprite</param>
+        /// <param name="speed">Animation speed for the action.  0 means the action is instant</param>
+        /// <param name="abs">Flag to set if the position is absolute</param>
+        public ActionSlot(ActionCommand action, CharacterBase actor, Vector2 endPosition, int speed, bool abs)
+            : this(action, actor)
+        {
+            this.endPosition = endPosition;
+            this.speed = speed;
+            absolutePosition = abs;
+        }
+
+        /// <summary>
         /// Constructor for the actor taking damage.
         /// </summary>
         /// <param name="action">Should be TakeDamage</param>
@@ -209,6 +274,21 @@ namespace ChronoForceData.Actions
         public void BattleTextFinished(object o, EventArgs e)
         {
             OnComplete();
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Used mainly for reusable action slots.  Resets the frames, step initialization, 
+        /// and finished boolean
+        /// </summary>
+        public void Reset()
+        {
+            isFinished = false;
+            stepInitialized = false;
+            actionFrame = 0;
         }
 
         #endregion
@@ -248,7 +328,7 @@ namespace ChronoForceData.Actions
                         break;
                     case ActionCommand.TakeDamage:
                         // Subtracts health from the actor
-                        actor.HP -= damage;
+                        //actor.HP -= damage;
                         OnComplete();
                         break;
                 };
@@ -269,6 +349,12 @@ namespace ChronoForceData.Actions
                             // Will only calculate this once
                             if (!stepInitialized)
                             {
+                                // If the positioning is relative, update the endPosition to have the 
+                                // correct absolute coordinate and calculate the step-size
+                                if (!absolutePosition)
+                                {
+                                    endPosition = actor.Position + endPosition;
+                                }
                                 stepSize = (endPosition - actor.Position) / (float)speed;
                                 stepInitialized = true;
                             }

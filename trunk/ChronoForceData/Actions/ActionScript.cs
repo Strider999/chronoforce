@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+//using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using ChronoForceData.Character;
 #endregion
 
@@ -29,6 +30,10 @@ namespace ChronoForceData.Actions
         /// Maximum number of concurrent actions the action script can render at once
         /// </summary>
         const int cMaxActions = 10;
+        /// <summary>
+        /// Maximum number of concurrent actors that can be referenced by a script
+        /// </summary>
+        const int cMaxActors = 10;
         #endregion
 
         #region Fields
@@ -36,17 +41,19 @@ namespace ChronoForceData.Actions
         Queue<ActionSlot> actionQueue;
         // List of current action slots being executed
         List<ActionSlot> currentAction = new List<ActionSlot>(cMaxActions);
+        // List of actors the script can handle
+        List<CharacterBase> actors = new List<CharacterBase>(cMaxActors);
         // Number of actions currently being rendered
         int numActions = 0;
         // A tracking variable for keeping tabs on the number of actions completed
         int actionsCompleted = 0;
         // Name of this script
         string name;
-        // Local copy of the array of strings representing action slots
-        List<string> slots = new List<string>();
 
+        // Local copy of the array of strings representing action slots
+        List<string> commands = new List<string>();
         // Local string array used to hold temporary data for splitting strings
-        private string[] splitString;
+        string[] splitString;
         #endregion
 
         #region Events
@@ -54,6 +61,7 @@ namespace ChronoForceData.Actions
         /// <summary>
         /// Signals when it finished an action.
         /// </summary>
+        [ContentSerializerIgnore]
         public EventHandler<EventArgs> ScriptDone;
 
         /// <summary>
@@ -81,15 +89,23 @@ namespace ChronoForceData.Actions
         /// <summary>
         /// Local copy of the array of strings to process into action slots
         /// </summary>
-        public List<string> Slots
+        public List<string> Commands
         {
-            get { return slots; }
-            set { slots = value; }
+            get { return commands; }
+            set { commands = value; }
         }
 
         #endregion
 
         #region Initialization
+
+        /// <summary>
+        /// Default contructor called by the ContentType reader
+        /// </summary>
+        internal ActionScript()
+        {
+            // Does nothing
+        }
 
         /// <summary>
         /// Called by the reader to parse the file.  Should only be called by
@@ -101,13 +117,14 @@ namespace ChronoForceData.Actions
             name = input.ReadString();
 
             // Grab the array of actions
-            slots = input.ReadObject<List<string>>();
+            commands = input.ReadObject<List<string>>();
 
             // Parse the string for the commands
             // DEBUG:  Display the strings
-            for (int i = 0; i < slots.Count; i++)
+            Console.WriteLine("Name: {0}", name);
+            for (int i = 0; i < commands.Count; i++)
             {
-                Console.WriteLine("{0}: {1}", i, slots[i]);
+                Console.WriteLine("{0}: {1}", i, commands[i]);
             }
         }
 

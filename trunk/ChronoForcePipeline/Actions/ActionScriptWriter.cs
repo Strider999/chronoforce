@@ -38,7 +38,7 @@ namespace ChronoForcePipline
             output.Write(value.Name);
 
             // Write the list of strings
-            output.WriteObject<List<string>>(value.Slots);
+            output.WriteObject<List<string>>(value.Commands);
         }
     }
 }

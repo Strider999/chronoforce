@@ -20,7 +20,7 @@ namespace ChronoForceData.Character
     public class PartyClass
     {
         #region Fields
-        List<CharacterBase> party = new List<CharacterBase>(ChronoConstants.cMaxPartyMembers);
+        List<CombatCharacter> party = new List<CombatCharacter>(ChronoConstants.cMaxPartyMembers);
 
         // True if the character in party is ready
         bool[] playerReady = new bool[ChronoConstants.cMaxPartyMembers];
@@ -52,7 +52,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Obtains the list contain party members
         /// </summary>
-        public List<CharacterBase> Party
+        public List<CombatCharacter> Party
         {
             get { return party; }
             set { party = value; }
@@ -121,7 +121,7 @@ namespace ChronoForceData.Character
         /// Constructor to add one player to the party.
         /// </summary>
         /// <param name="player">Player to have with created class</param>
-        public PartyClass(CharacterBase player)
+        public PartyClass(CombatCharacter player)
         {
             party.Add(player);
                 
@@ -136,7 +136,7 @@ namespace ChronoForceData.Character
         /// <param name="first">First player to have with created class</param>
         /// <param name="second">Second player to have with created class</param>
         /// <param name="third">Third player to have with created class</param>
-        public PartyClass(CharacterBase first, CharacterBase second, CharacterBase third)
+        public PartyClass(CombatCharacter first, CombatCharacter second, CombatCharacter third)
         {
             party.Add(first);
             party.Add(second);
@@ -154,7 +154,7 @@ namespace ChronoForceData.Character
         /// Constructor with list of party members
         /// </summary>
         /// <param name="newParty">Party members to have in the created class</param>
-        public PartyClass(List<CharacterBase> newParty)
+        public PartyClass(List<CombatCharacter> newParty)
         {
             party = newParty;
 

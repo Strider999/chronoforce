@@ -18,6 +18,37 @@ using ChronoForceData.Base;
 
 namespace ChronoForceData.Character
 {
+    #region Struct
+
+    /// <summary>
+    /// Sprite struct that holds three strings representing how to render the character
+    /// </summary>
+    public struct ActionString
+    {
+        /// <summary>
+        /// Specifies what sprite type this is, either World or Battle
+        /// </summary>
+        public string type;
+        
+        /// <summary>
+        /// Specifies whether the sprite will be in motion. "Face" means the character
+        /// stands still while "Walk" animates the character walking in the direction.
+        /// </summary>
+        public string motion;
+
+        /// <summary>
+        /// Direction sprite to render
+        /// </summary>
+        public string direction;
+
+        /// <summary>
+        /// Combined three strings of the struct
+        /// </summary>
+        public string fullName;
+    }
+
+    #endregion
+
     /// <summary>
     /// A collection of sprites and animations that represent the character.  The necessary
     /// information is loaded from the Content Manager
@@ -30,10 +61,9 @@ namespace ChronoForceData.Character
         // Container to hold all the battle sprites
         Dictionary<string, AnimatedSprite> battleSprites;
         // Strings for determining how to animate the character
-        string worldType = "Front";
-        string battleType = "Front";
+        ActionString action = new ActionString();
         // Bool for determining where the character is to determine which
-        // sprite to redner
+        // sprite to render
         bool inBattle = false;
         // Bool for determining if the sprite will be mirrored.  Used mainly
         // when the character is moving right since there's only a Left sprite
@@ -62,34 +92,77 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Sets/gets what to draw for the character when overworld.
         /// </summary>
-        public string WorldType
+        public ActionString Action
         {
-            get { return worldType; }
+            get { return action; }
             set 
             { 
                 // Special case:  If the direction is "right", make it left and
                 // mirror the sprite
-                if (value == "Right")
+                action = value;
+                if (action.direction == "Right" )
                 {
-                    worldType = "Left";
+                    action.direction = "Left";
                     isMirrored = true;
                 }
                 else
                 {
-                    worldType = value;
                     isMirrored = false;
                 }
-            
             }
         }
 
         /// <summary>
-        /// Sets/gets what to draw for the character when in battle.
+        /// Specifies what sprite type this is, either World or Battle
         /// </summary>
-        public string BattleType
+        public string Type
         {
-            get { return battleType; }
-            set { battleType = value; }
+            get { return action.type; }
+            set
+            {
+                action.type = value;
+                action.fullName = action.type + action.motion + action.direction;
+            }
+        }
+
+        /// <summary>
+        /// Specifies whether the sprite will be in motion. "Face" means the character
+        /// stands still while "Walk" animates the character walking in the direction.
+        /// </summary>
+        public string Motion
+        {
+            get { return action.motion; }
+            set
+            {
+                action.motion = value;
+                action.fullName = action.type + action.motion + action.direction;
+            }
+        }
+
+        /// <summary>
+        /// Direction sprite to render
+        /// </summary>
+        public string Direction
+        {
+            get { return action.direction; }
+            set
+            {
+                action.direction = value;
+
+                // Special case:  If the direction is "right", make it left and
+                // mirror the sprite
+                if (action.direction == "Right")
+                {
+                    action.direction = "Left";
+                    isMirrored = true;
+                }
+                else
+                {
+                    isMirrored = false;
+                }
+
+                action.fullName = action.type + action.motion + action.direction;
+            }
         }
 
         /// <summary>
@@ -123,17 +196,19 @@ namespace ChronoForceData.Character
             // Initialize the dictionaries
             worldSprites = new Dictionary<string, AnimatedSprite>();
             battleSprites = new Dictionary<string, AnimatedSprite>();
+
+            // Place default values into the action string
+            action.type = "World";
+            action.motion = "Face";
+            action.direction = "Front";
         }
 
         /// <summary>
         /// Constructor with a provided texture for debugging
         /// </summary>
         public CharacterSprite(Texture2D character)
+            : this()
         {
-            // Initialize the dictionaries
-            worldSprites = new Dictionary<string, AnimatedSprite>();
-            battleSprites = new Dictionary<string, AnimatedSprite>();
-
             characterTexture = character;
         }
 
@@ -203,7 +278,7 @@ namespace ChronoForceData.Character
 
                 // Increment the frame
                 if (!inBattle)
-                    worldSprites[worldType].IncrementAnimationFrame();
+                    worldSprites[action.fullName].IncrementAnimationFrame();
             }
         }
 
@@ -232,7 +307,7 @@ namespace ChronoForceData.Character
             {
                 // TODO:  Need a safety check when accessing the dictionary since the string
                 // may be invalid.
-                AnimatedSprite sprite = worldSprites[worldType];
+                AnimatedSprite sprite = worldSprites[action.fullName];
                 sprite.Position = position;
 
                 // If the sprite is mirrored, set the effect to reflect it

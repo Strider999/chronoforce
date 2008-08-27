@@ -34,19 +34,19 @@ namespace ChronoForceData.Base
     public class AnimatedSprite
     {
         #region Fields
-        private SpriteSheet sheet;
-        private Texture2D texture;
-        private Vector2 positionValue;
-        private Vector2 originValue = Vector2.Zero;
-        private Vector2 scaleValue = Vector2.One;
-        private float rotationValue = 0;
-        private int currentFrameValue;
-        private int numFrames;
+        SpriteSheet sheet;
+        Texture2D texture;
+        Vector2 positionValue;
+        Vector2 originValue = Vector2.Zero;
+        Vector2 scaleValue = Vector2.One;
+        float rotationValue = 0;
+        int currentFrameValue;
+        int numFrames;
 
         // If true, the animation loops.  By default, this is true.
         bool isLooping = true;
         // Dictionary for holding rectangle coordinates
-        private Dictionary<int, Rectangle> spriteDefinitions;
+        Dictionary<int, Rectangle> spriteDefinitions;
         #endregion
 
         #region Public Properties

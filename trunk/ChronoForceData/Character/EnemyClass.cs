@@ -7,7 +7,7 @@ namespace ChronoForceData.Character
     /// <summary>
     /// Main class for handling enemies and their actions
     /// </summary>
-    public class EnemyClass : CharacterBase
+    public class EnemyClass : CombatCharacter
     {
         #region Fields
 
