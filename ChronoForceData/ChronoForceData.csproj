@@ -39,6 +39,7 @@
     <Compile Include="Actions\ActionScript.cs" />
     <Compile Include="Actions\ActionSlot.cs" />
     <Compile Include="Actions\BattleText.cs" />
+    <Compile Include="Character\CharacterNPC.cs" />
     <Compile Include="Character\CombatCharacter.cs" />
     <Compile Include="Fonts.cs" />
     <Compile Include="Base\AnimatedSprite.cs" />
