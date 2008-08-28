@@ -47,8 +47,8 @@
     <Compile Include="Character\CharacterBase.cs" />
     <Compile Include="Character\CharacterSprite.cs" />
     <Compile Include="Character\EnemyClass.cs" />
-    <Compile Include="Character\Equipment.cs" />
-    <Compile Include="Character\EquipmentDatabase.cs" />
+    <Compile Include="Items\Equipment.cs" />
+    <Compile Include="Items\EquipmentDatabase.cs" />
     <Compile Include="Character\PartyClass.cs" />
     <Compile Include="Character\PlayerClass.cs" />
     <Compile Include="Graphics\AnimatedSprite.cs" />

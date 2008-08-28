@@ -62,6 +62,9 @@ namespace ChronoForce.Engine
         const int cDefaultTileHeight = 40;
         const int cDefaultTileWidth = 40;
         const int cTileOffset = 1;
+        // Maximum number of actors on a map
+        const int cMaxActors = 20;
+        readonly Vector2 cSpriteScale = new Vector2(1f, 1f);
         #endregion
 
         #region Fields
@@ -77,11 +80,15 @@ namespace ChronoForce.Engine
         TileGrid middleLayer;
         TileGrid topLayer;
 
-        // Animated sprites
+        // Animated sprites (TODO:  For tiles later)
         //private SpriteSheet animatedSpriteSheet;
         //private AnimatedSprite animatedSprite;
         //private Vector2 animatedSpritePosition;
         //private float accumulator;
+
+        // Sprite information
+        List<CharacterBase> mapActors = new List<CharacterBase>(cMaxActors);
+        CharacterBase player;
 
         // Flag to see if the engine has loaded anything
         bool isMapLoaded;
@@ -108,6 +115,24 @@ namespace ChronoForce.Engine
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Used for keeping track of the player on the world map
+        /// </summary>
+        public static CharacterBase Player
+        {
+            get { return singleton.player; }
+            set { singleton.player = value; }
+        }
+
+        /// <summary>
+        /// Private property used for debugging
+        /// </summary>
+        private string StatusMsg
+        {
+            get { return statusMsg; }
+            set { statusMsg = value; }
+        }
 
         /// <summary>
         /// Returns the world camera
@@ -219,7 +244,7 @@ namespace ChronoForce.Engine
 
         #endregion
 
-        #region Private Helper Methods
+        #region Loading Map
 
         /// <summary>
         /// Loads the specified map from the passed filename
@@ -353,15 +378,19 @@ namespace ChronoForce.Engine
         /// <param name="filename">Map file to load</param>
         /// <param name="content">Content manager for loading graphics</param>
         /// <param name="graphics">Graphics for rendering to the screen</param>
+        /// <param name="playerArg">Player party to be rendered on the screen</param>
         /// <returns>True if the load succeeded, false otherwise</returns>
         public static bool LoadMapEngine(string filename, 
-            GraphicsDevice graphics, ContentManager content)
+            GraphicsDevice graphics, ContentManager content, CharacterBase playerArg)
         {
             // Clears any previously loaded map
             ClearMapEngine();
 
             // Create a new instance of the MapEngine
             singleton = new MapEngine(graphics, content);
+
+            // Set the player
+            Player = playerArg;
 
             // DEBUG:  Load the XML
             ActionScript tester = content.Load<ActionScript>("TestScript");
@@ -483,17 +512,17 @@ namespace ChronoForce.Engine
         /// Reset the camera to the center of the tile grid
         /// and reset the position of the animted sprite
         /// </summary>
-        private void ResetToInitialPositions()
+        private static void ResetToInitialPositions()
         {
             //set up the 2D camera
             //set the initial position to the center of the
             //tile field
-            camera.Position = new Vector2(cNumTiles);
-            camera.Rotation = 0f;
-            camera.Zoom = 1f;
-            camera.MoveUsingScreenAxis = true;
+            Camera.Position = new Vector2(cNumTiles);
+            Camera.Rotation = 0f;
+            Camera.Zoom = 1f;
+            Camera.MoveUsingScreenAxis = true;
 
-            CameraChanged();
+            singleton.CameraChanged();
         }
 
         /// <summary>
@@ -505,15 +534,20 @@ namespace ChronoForce.Engine
             //set rotation
             topLayer.CameraRotation = middleLayer.CameraRotation =
                 bottomLayer.CameraRotation = camera.Rotation;
+            player.Sprite.Rotation = camera.Rotation;
 
             //set zoom
             topLayer.CameraZoom = middleLayer.CameraZoom =
-            bottomLayer.CameraZoom = camera.Zoom;
+                bottomLayer.CameraZoom = camera.Zoom;
+            player.Sprite.Scale = cSpriteScale * camera.Zoom;
 
             //set position
             topLayer.CameraPosition = camera.Position;
             middleLayer.CameraPosition = camera.Position;
             bottomLayer.CameraPosition = camera.Position;
+
+            // Every time the camera changes, also update the characters
+            player.Sprite.Origin = (camera.Position - player.Position);
 
             //changes have been accounted for, reset the changed value so that this
             //function is not called unnecessarily
@@ -556,7 +590,7 @@ namespace ChronoForce.Engine
                 // NOTE:  Drawing the sprite between the middle layer and top layer.
                 // This will allow the top layer to over lap for arches or other tall map
                 // structures.
-                //character.Draw(spriteBatch, Color.White, SpriteBlendMode.None);
+                //character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
 
                 if ((debugOn && showLayer[2]) || showLayer[2])
                     topLayer.Draw(spriteBatch);
@@ -571,10 +605,8 @@ namespace ChronoForce.Engine
                 character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
 
                 // Update debug status
-                statusMsg = "Rotation: " + camera.Rotation + "  Position = X:" + camera.Position.X +
-                    " Y:" + camera.Position.Y + "  Zoom: " + camera.Zoom;
                 MapDebug.StatusMsg = statusMsg;
-
+  
                 // Print out debug message
                 MapDebug.Draw(gameTime, ChronosEngine.ScreenManager.SpriteBatch);
             }
@@ -661,7 +693,27 @@ namespace ChronoForce.Engine
                     MapDebug.ShowStatusMsg = !MapDebug.ShowStatusMsg;
                     MapDebug.Add("[5] Toggling Status Display");
                 }
+
+                // Reset the camera values
+                if (input.IsNewKeyPress(Keys.Multiply))
+                {
+                    ResetToInitialPositions();
+                    MapDebug.Add("[*] Resetting Camera Positions");
+                }
             }
+        }
+
+        /// <summary>
+        /// Updates status debugs to be printed
+        /// </summary>
+        /// <param name="character"></param>
+        /// <param name="pos"></param>
+        public static void UpdateDebugMsg(CharacterBase character, Point pos)
+        {
+            singleton.StatusMsg = "Rotation: " + Camera.Rotation + "  Position = X:" + Camera.Position.X +
+    " Y:" + Camera.Position.Y + "  Zoom: " + Camera.Zoom + "\n";
+            singleton.StatusMsg += "Char: X=" + character.Position.X + " Y:=" + character.Position.Y + "\n";
+            singleton.StatusMsg += "MapChar: X=" + pos.X + " Y=" + pos.Y;
         }
 
         #endregion

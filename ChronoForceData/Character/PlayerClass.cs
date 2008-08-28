@@ -1,6 +1,17 @@
+#region File Description
+//-----------------------------------------------------------------------------
+// PlayerClass.cs
+//
+// Created by David Hsu
+//-----------------------------------------------------------------------------
+#endregion
+
+#region Using Statements
 using System;
 using System.Collections.Generic;
 using ChronoForceData.Base;
+using ChronoForceData.Items;
+#endregion
 
 namespace ChronoForceData.Character
 {

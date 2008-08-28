@@ -70,6 +70,13 @@ namespace ChronoForceData.Character
         bool isMirrored = false;
         // Timer for when to advance the frame
         int spriteTimer = 0;
+        // Local copy for drawing the sprite in Draw
+        AnimatedSprite drawingSprite;
+
+        // Camera values for rendering the sprite in respect to the camera
+        Vector2 originValue = Vector2.Zero;
+        float rotationValue = 0;
+        Vector2 scaleValue = Vector2.One;
 
         // NOTE:  These should be sprite sheets and animated sprite sheets, but for now, leave it as
         // a single texture for testing purposes.
@@ -79,6 +86,30 @@ namespace ChronoForceData.Character
         #endregion
 
         #region Properties
+
+        #region Camera Properties
+
+        public Vector2 Origin
+        {
+            set { originValue = value; }
+            get { return originValue; }
+        }
+
+        public float Rotation
+        {
+            set { rotationValue = value; }
+            get { return rotationValue; }
+        }
+
+        public Vector2 Scale
+        {
+            set { scaleValue = value; }
+            get { return scaleValue; }
+        }
+
+        #endregion
+
+        #region CharacterSprite Properties
 
         /// <summary>
         /// DEBUG:  Returns the texture that represents the character
@@ -183,6 +214,8 @@ namespace ChronoForceData.Character
             get { return isMirrored; }
             set { isMirrored = value; }
         }
+
+        #endregion
 
         #endregion
 
@@ -307,14 +340,19 @@ namespace ChronoForceData.Character
             {
                 // TODO:  Need a safety check when accessing the dictionary since the string
                 // may be invalid.
-                AnimatedSprite sprite = worldSprites[action.fullName];
-                sprite.Position = position;
+                drawingSprite = worldSprites[action.fullName];
+                
+                // Update the positions before drawing
+                drawingSprite.Position = position;
+                drawingSprite.Origin = originValue;
+                drawingSprite.Rotation = rotationValue;
+                drawingSprite.ScaleValue = scaleValue;
 
                 // If the sprite is mirrored, set the effect to reflect it
                 if (isMirrored)
                     effect = SpriteEffects.FlipHorizontally;
 
-                sprite.Draw(batch, color, blendMode, effect);
+                drawingSprite.Draw(batch, color, blendMode, effect);
             }
         }
 
