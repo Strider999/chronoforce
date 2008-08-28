@@ -103,7 +103,7 @@ namespace ChronoForce.Screens
 
             // DEBUG:  Load a map
             //gameEngine.mapEngine.loadMap("Maps\\mountaintest.map");
-            MapEngine.LoadMapEngine("Maps\\largemaptest.map", ScreenManager.GraphicsDevice, content);
+            MapEngine.LoadMapEngine("Maps\\largemaptest.map", ScreenManager.GraphicsDevice, content, worldSprite);
         }
 
 
@@ -129,6 +129,9 @@ namespace ChronoForce.Screens
         public override void Update(GameTime gameTime, bool otherScreenHasFocus,
                                                        bool coveredByOtherScreen)
         {
+            // Update the status messages
+            MapEngine.UpdateDebugMsg(worldSprite, characterPosition);
+
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
 
             if (IsActive)

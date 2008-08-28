@@ -312,7 +312,6 @@ namespace ChronoForce.Engine
             Vector2 screenCenter = new Vector2(
                 (displaySize.X / 2),
                 (displaySize.Y / 2));
-            //Vector2 screenCenter = Vector2.Zero;
 
             //begin a batch of sprites to be drawn all at once
             batch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.Deferred,
@@ -323,10 +322,8 @@ namespace ChronoForce.Engine
             bool validTile;
 
             for (int x = visibleTiles.Left; x < visibleTiles.Right; x++)
-            //for (int x = 0; x < 10; x++)
             {
                 for (int y = visibleTiles.Top; y < visibleTiles.Bottom; y++)
-                //for (int y = 0; y < 10; y++)
                 {
                     if (grid[x][y] != 0)
                     {

@@ -29,7 +29,7 @@ using ChronoForceData.Graphics;
 namespace ChronoForceData.Base
 {
     /// <summary>
-    /// 
+    /// The basic class for animated sprites.
     /// </summary>
     public class AnimatedSprite
     {
