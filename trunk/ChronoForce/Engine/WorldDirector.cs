@@ -45,7 +45,7 @@ namespace ChronoForce.Engine
         readonly Vector2 cMoveLeft = new Vector2(-cXAmount, 0);
 
         // Movement speed
-        const int cDefaultMoveSpeed = 7;
+        const int cDefaultMoveFrame = 7;
 
         #endregion
 
@@ -59,6 +59,9 @@ namespace ChronoForce.Engine
 
         // Local action slot that will be reused to move the main part around the place
         ActionSlot moveSlot = new ActionSlot();
+
+        // Vector for moving the actor around the screen
+        Vector2 moveVector = new Vector2();
 
         #endregion
 
@@ -129,15 +132,50 @@ namespace ChronoForce.Engine
         }
 
         /// <summary>
-        /// Adds a single action to the list that moves the party in a given direction.
+        /// Adds a single action to the list that moves the party in a given direction using the default speed.
         /// </summary>
+        /// <param name="actor">Actor to move on the field</param>
         /// <param name="direction">Direction to move the party</param>
         public void MoveParty(CharacterBase actor, MapDirection direction)
         {
             moveSlot.Action = ActionCommand.MoveTo;
             moveSlot.Actor = actor;
             moveSlot.IsAbsolute = false;
-            moveSlot.Speed = cDefaultMoveSpeed;
+            moveSlot.Frames = cDefaultMoveFrame;
+
+            switch (direction)
+            {
+                case MapDirection.Up:
+                    moveSlot.EndPosition = cMoveUp;
+                    break;
+                case MapDirection.Down:
+                    moveSlot.EndPosition = cMoveDown;
+                    break;
+                case MapDirection.Left:
+                    moveSlot.EndPosition = cMoveLeft;
+                    break;
+                case MapDirection.Right:
+                    moveSlot.EndPosition = cMoveRight;
+                    break;
+            }
+
+            // Mark that the moveSlot is active again
+            moveSlot.Reset();
+            moveSlot.Complete += PartyMoveHandler;
+        }
+
+        /// <summary>
+        /// Adds a single action to the list that moves the party in a given direction using the specified speed.
+        /// </summary>
+        /// <param name="actor">Actor to move on the field</param>
+        /// <param name="direction">Direction to move the party</param>
+        /// <param name="speed">Number of frames to move the actor</param>
+        public void MoveParty(CharacterBase actor, MapDirection direction, int frames)
+        {
+            moveSlot.Action = ActionCommand.MoveTo;
+            moveSlot.Actor = actor;
+            moveSlot.IsAbsolute = false;
+            moveSlot.Frames = frames;
 
             switch (direction)
             {

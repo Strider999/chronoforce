@@ -55,6 +55,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Sets/Gets the player ID used for position in a party and scripts
         /// </summary>
+        [ContentSerializerIgnore]
         public int ID
         {
             get { return id; }
@@ -73,6 +74,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// The sprite representing the character
         /// </summary>
+        [ContentSerializerIgnore]
         public CharacterSprite Sprite
         {
             get { return sprite; }

@@ -64,8 +64,8 @@ namespace ChronoForceData.Actions
         // Linear interpolation step between the position and endPosition based on speed
         Vector2 stepSize;
         // Determines how fast to animate the action.  Note that this is in frames of animation.
-        // If speed is 0, then the movement will be instant.
-        int speed = 0;
+        // If frames is 0, then the movement will be instant.
+        int frames = 0;
         // Number for damage
         int damage = 0;
         // Wait time for commands that pause the action
@@ -115,10 +115,10 @@ namespace ChronoForceData.Actions
         /// <summary>
         /// How fast to animate the action in frames.  0 means instant.
         /// </summary>
-        public int Speed
+        public int Frames
         {
-            get { return speed; }
-            set { speed = value; }
+            get { return frames; }
+            set { frames = value; }
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace ChronoForceData.Actions
             : this(action, actor)
         {
             this.endPosition = endPosition;
-            this.speed = speed;
+            this.frames = speed;
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace ChronoForceData.Actions
             : this(action, actor)
         {
             this.endPosition = endPosition;
-            this.speed = speed;
+            this.frames = speed;
             absolutePosition = abs;
         }
 
@@ -355,7 +355,7 @@ namespace ChronoForceData.Actions
                                 {
                                     endPosition = actor.Position + endPosition;
                                 }
-                                stepSize = (endPosition - actor.Position) / (float)speed;
+                                stepSize = (endPosition - actor.Position) / (float)frames;
                                 stepInitialized = true;
                             }
 
@@ -366,7 +366,7 @@ namespace ChronoForceData.Actions
                             // position perfectly.  Note that if speed is 0, this will
                             // instantly move the sprite to the end position.
                             if (actor.Position == endPosition ||
-                                actionFrame > speed)
+                                actionFrame > frames)
                             {
                                 actor.Position = endPosition;
                                 OnComplete();
