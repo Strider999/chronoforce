@@ -154,7 +154,7 @@ namespace ChronoForce.Base
                 if (showDebugMsg)
                 {
                     // Starting line for messages
-                    int y = ChronoForce.gameSettings.WindowHeight - 10;
+                    int y = ChronosSetting.WindowHeight - 10;
 
                     // Print each message in the list to the screen
                     foreach (string msg in debugList.ToArray())
@@ -179,7 +179,7 @@ namespace ChronoForce.Base
                 // Render the status on the top right of the screen
                 if (showStatusMsg)
                 {
-                    int statusX = ChronoForce.gameSettings.WindowWidth - 
+                    int statusX = ChronosSetting.WindowWidth - 
                         (int)Fonts.DebugFont.MeasureString(statusMsg).X;
                     int statusY = 10;
                     spriteBatch.DrawString(Fonts.DebugFont, statusMsg, new Vector2(statusX, statusY), Color.White,

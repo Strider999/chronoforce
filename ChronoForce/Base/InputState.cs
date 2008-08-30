@@ -68,7 +68,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsNewKeyPress(ChronoForce.gameSettings.UpKey) ||
+                return IsNewKeyPress(ChronosSetting.UpKey) ||
                        IsNewButtonPress(Buttons.DPadUp) ||
                        IsNewButtonPress(Buttons.LeftThumbstickUp);
             }
@@ -82,7 +82,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsNewKeyPress(ChronoForce.gameSettings.DownKey) ||
+                return IsNewKeyPress(ChronosSetting.DownKey) ||
                        IsNewButtonPress(Buttons.DPadDown) ||
                        IsNewButtonPress(Buttons.LeftThumbstickDown);
             }
@@ -96,7 +96,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsNewKeyPress(ChronoForce.gameSettings.RightKey) ||
+                return IsNewKeyPress(ChronosSetting.RightKey) ||
                        IsNewButtonPress(Buttons.DPadRight) ||
                        IsNewButtonPress(Buttons.LeftThumbstickRight);
             }
@@ -110,7 +110,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsNewKeyPress(ChronoForce.gameSettings.LeftKey) ||
+                return IsNewKeyPress(ChronosSetting.LeftKey) ||
                        IsNewButtonPress(Buttons.DPadLeft) ||
                        IsNewButtonPress(Buttons.LeftThumbstickLeft);
             }
@@ -124,7 +124,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsKeyPress(ChronoForce.gameSettings.UpKey) ||
+                return IsKeyPress(ChronosSetting.UpKey) ||
                        IsButtonPress(Buttons.DPadUp) ||
                        IsButtonPress(Buttons.LeftThumbstickUp);
             }
@@ -138,7 +138,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsKeyPress(ChronoForce.gameSettings.DownKey) ||
+                return IsKeyPress(ChronosSetting.DownKey) ||
                        IsButtonPress(Buttons.DPadDown) ||
                        IsButtonPress(Buttons.LeftThumbstickDown);
             }
@@ -152,7 +152,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsKeyPress(ChronoForce.gameSettings.RightKey) ||
+                return IsKeyPress(ChronosSetting.RightKey) ||
                        IsButtonPress(Buttons.DPadRight) ||
                        IsButtonPress(Buttons.LeftThumbstickRight);
             }
@@ -166,7 +166,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsKeyPress(ChronoForce.gameSettings.LeftKey) ||
+                return IsKeyPress(ChronosSetting.LeftKey) ||
                        IsButtonPress(Buttons.DPadLeft) ||
                        IsButtonPress(Buttons.LeftThumbstickLeft);
             }
@@ -180,7 +180,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsNewKeyPress(ChronoForce.gameSettings.ConfirmKey) ||
+                return IsNewKeyPress(ChronosSetting.ConfirmKey) ||
                        IsNewKeyPress(Keys.Enter) ||
                        IsNewButtonPress(Buttons.A) ||
                        IsNewButtonPress(Buttons.Start);
@@ -195,7 +195,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsNewKeyPress(ChronoForce.gameSettings.ConfirmKey) ||
+                return IsNewKeyPress(ChronosSetting.ConfirmKey) ||
                        IsNewButtonPress(Buttons.A);
             }
         }
@@ -208,7 +208,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsNewKeyPress(ChronoForce.gameSettings.CancelKey) ||
+                return IsNewKeyPress(ChronosSetting.CancelKey) ||
                        IsNewButtonPress(Buttons.B) ||
                        IsNewButtonPress(Buttons.Back);
             }
@@ -223,7 +223,7 @@ namespace ChronoForce.Base
         {
             get
             {
-                return IsNewKeyPress(ChronoForce.gameSettings.StartKey) ||
+                return IsNewKeyPress(ChronosSetting.StartKey) ||
                        IsNewButtonPress(Buttons.Back) ||
                        IsNewButtonPress(Buttons.Start);
             }

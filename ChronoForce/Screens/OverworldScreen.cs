@@ -81,7 +81,8 @@ namespace ChronoForce.Screens
 
             Texture2D textureSprite = content.Load<Texture2D>("lockesprite");
             CharacterSprite sprite = new CharacterSprite();
-            
+            sprite.ScreenCenter = ChronosSetting.WindowSize / 2;
+
             // Default values for the loop
             string[] keys = new string[6]{"WorldFaceBack", "WorldFaceFront", "WorldFaceLeft", "WorldWalkBack", 
                 "WorldWalkFront", "WorldWalkLeft"};

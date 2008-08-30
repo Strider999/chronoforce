@@ -74,9 +74,14 @@ namespace ChronoForceData.Character
         AnimatedSprite drawingSprite;
 
         // Camera values for rendering the sprite in respect to the camera
-        Vector2 originValue = Vector2.Zero;
+        Vector2 cameraPositionValue = Vector2.Zero;
         float rotationValue = 0;
+        Matrix rotationMatrix;
         Vector2 scaleValue = Vector2.One;
+        float zoomValue = 0;
+
+        // Center of the screen for rendering sprites (reference point in respect to the camera)
+        Vector2 screenCenter;
 
         // NOTE:  These should be sprite sheets and animated sprite sheets, but for now, leave it as
         // a single texture for testing purposes.
@@ -89,16 +94,25 @@ namespace ChronoForceData.Character
 
         #region Camera Properties
 
-        public Vector2 Origin
+        public Vector2 CameraPosition
         {
-            set { originValue = value; }
-            get { return originValue; }
+            set { cameraPositionValue = value; }
+            get { return cameraPositionValue; }
         }
 
-        public float Rotation
+        public float CameraRotation
         {
-            set { rotationValue = value; }
+            set { 
+                rotationValue = value;
+                rotationMatrix = Matrix.CreateRotationZ(rotationValue);
+            }
             get { return rotationValue; }
+        }
+
+        public float CameraZoom
+        {
+            set { zoomValue = value; }
+            get { return zoomValue; }
         }
 
         public Vector2 Scale
@@ -213,6 +227,16 @@ namespace ChronoForceData.Character
         {
             get { return isMirrored; }
             set { isMirrored = value; }
+        }
+
+        /// <summary>
+        /// Position of the center of the screen.  Should only be set when first loading
+        /// the screen and any change to the resolution.
+        /// </summary>
+        public Vector2 ScreenCenter
+        {
+            get { return screenCenter; }
+            set { screenCenter = value; }
         }
 
         #endregion
@@ -341,12 +365,32 @@ namespace ChronoForceData.Character
                 // TODO:  Need a safety check when accessing the dictionary since the string
                 // may be invalid.
                 drawingSprite = worldSprites[action.fullName];
-                
-                // Update the positions before drawing
-                drawingSprite.Position = position;
-                drawingSprite.Origin = originValue;
+
+                Vector2 scale = Vector2.One;
+
+                // Since position is a struct, we can change the values here without effecting the
+                // actual position.  We need to do this to convert the coordinates to
+                // camera coordinates.
+                // First, scale the positions based on the sprite scale
+                position.X *= scaleValue.X;
+                position.Y *= scaleValue.Y;
+
+                // Now, we get the camera position relative to the sprite's position
+                Vector2.Subtract(ref cameraPositionValue, ref position,
+                    out position);
+
+                // Get the sprite's final size (note that scaling is done after
+                // determining the position)
+                Vector2.Multiply(ref scaleValue, zoomValue, out scale);
+
+                // Update the positions with world positions before drawing
+                // Note that the origin is the position and position is the screen center.
+                // This is required to enable scaling and rotation about the center of the 
+                // screen by drawing tiles as an offset from the center coordinate
+                drawingSprite.Position = screenCenter;
+                drawingSprite.Origin = position;
                 drawingSprite.Rotation = rotationValue;
-                drawingSprite.ScaleValue = scaleValue;
+                drawingSprite.ScaleValue = scale;
 
                 // If the sprite is mirrored, set the effect to reflect it
                 if (isMirrored)

@@ -517,6 +517,7 @@ namespace ChronoForce.Engine
             //set up the 2D camera
             //set the initial position to the center of the
             //tile field
+            // NOTE:  Is there a better way of updating the camera to the sprite?
             Camera.Position = new Vector2(cNumTiles);
             Camera.Rotation = 0f;
             Camera.Zoom = 1f;
@@ -533,21 +534,21 @@ namespace ChronoForce.Engine
         {
             //set rotation
             topLayer.CameraRotation = middleLayer.CameraRotation =
-                bottomLayer.CameraRotation = camera.Rotation;
-            player.Sprite.Rotation = camera.Rotation;
+                bottomLayer.CameraRotation = player.Sprite.CameraRotation = camera.Rotation;
 
             //set zoom
             topLayer.CameraZoom = middleLayer.CameraZoom =
                 bottomLayer.CameraZoom = camera.Zoom;
-            player.Sprite.Scale = cSpriteScale * camera.Zoom;
+            player.Sprite.CameraZoom = camera.Zoom;
 
             //set position
             topLayer.CameraPosition = camera.Position;
             middleLayer.CameraPosition = camera.Position;
             bottomLayer.CameraPosition = camera.Position;
+            player.Sprite.CameraPosition = camera.Position;
 
             // Every time the camera changes, also update the characters
-            player.Sprite.Origin = (camera.Position - player.Position);
+            //player.Sprite.Origin = (camera.Position - player.Position) / cSpriteScale.X;
 
             //changes have been accounted for, reset the changed value so that this
             //function is not called unnecessarily
@@ -590,7 +591,7 @@ namespace ChronoForce.Engine
                 // NOTE:  Drawing the sprite between the middle layer and top layer.
                 // This will allow the top layer to over lap for arches or other tall map
                 // structures.
-                //character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
+                character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
 
                 if ((debugOn && showLayer[2]) || showLayer[2])
                     topLayer.Draw(spriteBatch);
@@ -602,7 +603,7 @@ namespace ChronoForce.Engine
                 if (camera.IsChanged)
                     CameraChanged();
 
-                character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
+                //character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
 
                 // Update debug status
                 MapDebug.StatusMsg = statusMsg;
