@@ -421,29 +421,37 @@ namespace ChronoForce.Engine
         /// <returns>True if the character can walk in the specified direction</returns>
         public static bool IsPassable(Point position, MapDirection direction)
         {
+            // TODO:  This checks both the current tile and the next, which works, but prevents the
+            // creation of one-way walls, which could be useful later.  If we do use one-way walls,
+            // then should we check for the next tile over for passibility? Would be more intuitive
+            // for the Tile Studio end.
             // Checks the direction movement
             if (direction == MapDirection.Up)
             {
                 // If at the edge, or if the top is blocked, character can't move
-                if ( (position.Y == 0) || ((MapBounds[position.X][position.Y] & 0x01) == 1) )
+                if ( (position.Y == 0) || ((MapBounds[position.X][position.Y] & 0x01) > 0) ||
+                     ((position.Y != 0) && ((MapBounds[position.X][position.Y-1] & 0x04) > 0)) )
                     return false;
             }
             else if (direction == MapDirection.Down)
             {
                 // If the bottom is blocked or at the edge
-                if ( (position.Y == MapHeight - 1 ) || ((MapBounds[position.X][position.Y] & 0x04) == 1) )
+                if ( (position.Y == MapHeight - 1 ) || ((MapBounds[position.X][position.Y] & 0x04) > 0) ||
+                    ((position.Y != MapHeight - 1 ) && ((MapBounds[position.X][position.Y+1] & 0x01) > 0)) )
                     return false;
             }
             else if (direction == MapDirection.Left)
             {
                 // If the left side is blocked or at the edge
-                if ( (position.X == 0) || ((MapBounds[position.X][position.Y] & 0x02) == 1) )
+                if ( (position.X == 0) || ((MapBounds[position.X][position.Y] & 0x02) > 0) ||
+                     ((position.X != 0) && ((MapBounds[position.X-1][position.Y] & 0x08) > 0)) )
                     return false;
             }
             else if (direction == MapDirection.Right)
             {
                 // If the right side is blocked or at the edge
-                if ( (position.X == MapWidth - 1) || ((MapBounds[position.X][position.Y] & 0x08) == 1) )
+                if ( (position.X == MapWidth - 1) || ((MapBounds[position.X][position.Y] & 0x08) > 0) ||
+                    ((position.X != MapWidth - 1) && ((MapBounds[position.X+1][position.Y] & 0x02) > 0)) )
                     return false;
             }
 
