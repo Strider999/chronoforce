@@ -26,8 +26,6 @@ namespace ChronoForce
         GraphicsDeviceManager graphics;
         // Handles transitions between screens
         ScreenManager screenManager;
-        // Settings for the game
-        public static ChronosSetting gameSettings;
         
         public ChronoForce()
         {
@@ -35,12 +33,12 @@ namespace ChronoForce
             Content.RootDirectory = "Content";
 
             // Load the default settings
-            gameSettings = new ChronosSetting();
+            ChronosSetting.LoadSetting();
 
             // NOTE:  This should be a dynamic resolution based on user settings
             // For now, leaving this on XBox friendly resolution.
-            graphics.PreferredBackBufferWidth = gameSettings.WindowWidth;
-            graphics.PreferredBackBufferHeight = gameSettings.WindowHeight;
+            graphics.PreferredBackBufferWidth = ChronosSetting.WindowWidth;
+            graphics.PreferredBackBufferHeight = ChronosSetting.WindowHeight;
 
             // Create the screen manager component.
             screenManager = new ScreenManager(this);

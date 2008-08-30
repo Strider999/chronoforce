@@ -35,8 +35,8 @@ namespace ChronoForce.Engine
         /// </summary>
         const int cMaxSlots = 10;
 
-        const int cXAmount = 32;
-        const int cYAmount = 32;
+        const int cXAmount = 39;
+        const int cYAmount = 39;
 
         // Constant vectors of movement directions
         readonly Vector2 cMoveUp = new Vector2(0, -cYAmount);
@@ -45,7 +45,7 @@ namespace ChronoForce.Engine
         readonly Vector2 cMoveLeft = new Vector2(-cXAmount, 0);
 
         // Movement speed
-        const int cMoveSpeed = 7;
+        const int cDefaultMoveSpeed = 7;
 
         #endregion
 
@@ -137,7 +137,7 @@ namespace ChronoForce.Engine
             moveSlot.Action = ActionCommand.MoveTo;
             moveSlot.Actor = actor;
             moveSlot.IsAbsolute = false;
-            moveSlot.Speed = cMoveSpeed;
+            moveSlot.Speed = cDefaultMoveSpeed;
 
             switch (direction)
             {

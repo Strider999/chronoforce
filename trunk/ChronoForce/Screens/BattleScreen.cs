@@ -262,7 +262,7 @@ namespace ChronoForce.Screens
 
             // Draw the battle menus and displays
             spriteBatch.Draw(battleDialog,
-                new Vector2(0, ChronoForce.gameSettings.WindowHeight - battleDialog.Height), Color.White);
+                new Vector2(0, ChronosSetting.WindowHeight - battleDialog.Height), Color.White);
 
             // DEBUG:  Drawing dummy values
             int y = 515;

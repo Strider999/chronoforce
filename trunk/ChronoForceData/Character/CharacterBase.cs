@@ -11,66 +11,12 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 using ChronoForceData.Base;
 #endregion
 
 namespace ChronoForceData.Character
 {
-    #region Structs
-
-    /// <summary>
-    /// Contains all essential character stats
-    /// </summary>
-    public struct CharacterStats
-    {
-        public int Level;    // Current charcter level
-        public int Attack;   // Physical strength and attack power
-        public int Defense;  // Defense against physical attacks
-        public int Speed;    // How fast the time bar fills and how well they dodge
-        public int Accuracy; // Ability to physically hit
-        public int Magic;    // Magic power for elemental skills/spells
-        public int MDefense; // Magic defense against elemental attacks
-        public int Time;     // Chrono affinity, determines character CF and resistance
-        public int HitPoints;      // Hit points
-        public int MaxHitPoints;
-        public int MagicPoints;    // Magic points for skills
-        public int MaxMagicPoints;
-        public int ChronoForce;    // Chrono Force, time based attacks
-        public int MaxChronoForce;
-
-        /// <summary>
-        /// Constructor with all the stats except for HP, MP, and CF
-        /// </summary>
-        /// <param name="level"></param>
-        /// <param name="attack"></param>
-        /// <param name="defense"></param>
-        /// <param name="speed"></param>
-        /// <param name="accuracy"></param>
-        /// <param name="magic"></param>
-        /// <param name="mdefense"></param>
-        /// <param name="time"></param>
-        public CharacterStats(int level, int attack, int defense, int speed,
-            int accuracy, int magic, int mdefense, int time)
-        {
-            Level = level;
-            Attack = attack;
-            Defense = defense;
-            Speed = speed;
-            Accuracy = accuracy;
-            Magic = magic;
-            MDefense = mdefense;
-            Time = time;
-            HitPoints = 1;
-            MaxHitPoints = 1;
-            MagicPoints = 0;
-            MaxMagicPoints = 0;
-            ChronoForce = 0;
-            MaxChronoForce = 0;
-        }
-    }
-
-    #endregion
-
     /// <summary>
     /// Defines characters and monsters with customizable skills and spells based on
     /// a loaded file.  The player class will inherit from this with more abilities and
@@ -85,7 +31,7 @@ namespace ChronoForceData.Character
         #endregion
 
         #region Fields
-        Vector2 position;  // Position to draw the character
+        Vector2 position = Vector2.Zero;  // Position to draw the character
 
         // Sprite class for the character
         CharacterSprite sprite;
@@ -162,8 +108,6 @@ namespace ChronoForceData.Character
             : this()
         {
             this.sprite = sprite;
-            position.X = 200;
-            position.Y = 200;
         }
 
         /// <summary>
@@ -186,8 +130,6 @@ namespace ChronoForceData.Character
             name = nameArg;
             id = -1;
             this.sprite = sprite;
-            position.X = 200;
-            position.Y = 200;
         }
 
         #endregion
@@ -218,6 +160,25 @@ namespace ChronoForceData.Character
         {
             // Passes it on to the internal sprite class for drawing
             sprite.Draw(batch, color, blendMode, position);
+        }
+
+        #endregion
+
+        #region Content Type Reader
+
+        /// <summary>
+        /// Reads a character base from the pipeline
+        /// </summary>
+        public class CharacterBaseReader : ContentTypeReader<CharacterBase>
+        {
+            /// <summary>
+            /// Reads a CharacterBase object from the content pipeline.
+            /// </summary>
+            protected override CharacterBase Read(ContentReader input,
+                CharacterBase existingInstance)
+            {
+                return null;
+            }
         }
 
         #endregion
