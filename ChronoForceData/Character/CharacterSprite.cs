@@ -83,6 +83,14 @@ namespace ChronoForceData.Character
         // Center of the screen for rendering sprites (reference point in respect to the camera)
         Vector2 screenCenter;
 
+        // XML fields for reading from the file
+        // String name of the texture to load from the content pipeline
+        string textureName;
+        // Type of texture being loaded.  This is between players, monsters, and NPCs
+        string textureType;
+        // TODO:  Need vectors and ints for texture size, animation frames, and offsets?  Or should
+        // this be partially hard-coded as a standard?
+
         // NOTE:  These should be sprite sheets and animated sprite sheets, but for now, leave it as
         // a single texture for testing purposes.
         Texture2D characterTexture;
@@ -94,12 +102,20 @@ namespace ChronoForceData.Character
 
         #region Camera Properties
 
+        /// <summary>
+        /// Where the camera is currently positioned
+        /// </summary>
+        [ContentSerializerIgnore]
         public Vector2 CameraPosition
         {
             set { cameraPositionValue = value; }
             get { return cameraPositionValue; }
         }
 
+        /// <summary>
+        /// How the camera is currently rotated on the screen
+        /// </summary>
+        [ContentSerializerIgnore]
         public float CameraRotation
         {
             set { 
@@ -109,12 +125,20 @@ namespace ChronoForceData.Character
             get { return rotationValue; }
         }
 
+        /// <summary>
+        /// What zoom level the camera is currently using
+        /// </summary>
+        [ContentSerializerIgnore]
         public float CameraZoom
         {
             set { zoomValue = value; }
             get { return zoomValue; }
         }
 
+        /// <summary>
+        /// Scale of the Texture being drawn. 1 is default and unchanged.
+        /// </summary>
+        [ContentSerializerIgnore]
         public Vector2 Scale
         {
             set { scaleValue = value; }
@@ -123,12 +147,17 @@ namespace ChronoForceData.Character
 
         #endregion
 
-        #region CharacterSprite Properties
+        #region XML CharacterSprite Properties
+
+        #endregion
+
+        #region Non-XML CharacterSprite Properties
 
         /// <summary>
         /// DEBUG:  Returns the texture that represents the character
         /// </summary>
         /// <remarks>This is only a temporary function for debugging</remarks>
+        [ContentSerializerIgnore]
         public Texture2D CharacterTexture
         {
             get { return characterTexture; }
@@ -137,6 +166,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Sets/gets what to draw for the character when overworld.
         /// </summary>
+        [ContentSerializerIgnore]
         public ActionString Action
         {
             get { return action; }
@@ -160,6 +190,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Specifies what sprite type this is, either World or Battle
         /// </summary>
+        [ContentSerializerIgnore]
         public string Type
         {
             get { return action.type; }
@@ -174,6 +205,7 @@ namespace ChronoForceData.Character
         /// Specifies whether the sprite will be in motion. "Face" means the character
         /// stands still while "Walk" animates the character walking in the direction.
         /// </summary>
+        [ContentSerializerIgnore]
         public string Motion
         {
             get { return action.motion; }
@@ -187,6 +219,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Direction sprite to render
         /// </summary>
+        [ContentSerializerIgnore]
         public string Direction
         {
             get { return action.direction; }
@@ -213,6 +246,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// True if the character is in battle and should render battle sprites.
         /// </summary>
+        [ContentSerializerIgnore]
         public bool InBattle
         {
             get { return inBattle; }
@@ -223,6 +257,7 @@ namespace ChronoForceData.Character
         /// True if the sprite render will be mirrored (mainly for displaying
         /// right movement)
         /// </summary>
+        [ContentSerializerIgnore]
         public bool IsMirrored
         {
             get { return isMirrored; }
@@ -233,6 +268,7 @@ namespace ChronoForceData.Character
         /// Position of the center of the screen.  Should only be set when first loading
         /// the screen and any change to the resolution.
         /// </summary>
+        [ContentSerializerIgnore]
         public Vector2 ScreenCenter
         {
             get { return screenCenter; }
