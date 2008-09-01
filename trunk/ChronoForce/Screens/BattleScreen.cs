@@ -20,6 +20,7 @@ using ChronoForce.Base;
 using ChronoForce.Engine;
 using ChronoForceData.Base;
 using ChronoForceData.Character;
+using ChronoForceData.Graphics;
 #endregion
 
 namespace ChronoForce.Screens
@@ -78,8 +79,8 @@ namespace ChronoForce.Screens
             blueBox = content.Load<Texture2D>("bluebox");
 
             // Load the character sprites
-            CharacterSprite playerSprite = new CharacterSprite(redBox);
-            CharacterSprite enemySprite = new CharacterSprite(blueBox);
+            AnimatingSprite playerSprite = new AnimatingSprite(redBox);
+            AnimatingSprite enemySprite = new AnimatingSprite(blueBox);
 
             // DEBUG:  Create a dummy party
             List<CombatCharacter> testList = new List<CombatCharacter>(ChronoConstants.cMaxPartyMembers);

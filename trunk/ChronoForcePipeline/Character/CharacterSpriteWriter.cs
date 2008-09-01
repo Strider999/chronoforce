@@ -1,6 +1,6 @@
 #region File Description
 //-----------------------------------------------------------------------------
-// ActionScriptWriter.cs
+// CharacterSpriteWriter.cs
 //
 // Microsoft XNA Community Game Platform
 // Copyright (C) David Hsu
@@ -17,7 +17,8 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
-using ChronoForceData.Actions;
+using ChronoForceData.Character;
+using ChronoForceData.Graphics;
 #endregion
 
 namespace ChronoForcePipeline
@@ -26,19 +27,26 @@ namespace ChronoForcePipeline
     /// This class will be instantiated by the XNA Framework Content Pipeline
     /// to write the specified data type into binary .xnb format.
     ///
-    /// Writes the ActionScript data
+    /// Writes the CharacterSprite data
     /// </summary>
     [ContentTypeWriter]
-    public class ActionScriptWriter : ChronoForceWriter<ActionScript>
+    public class CharacterSpriteWriter : ChronoForceWriter<AnimatingSprite>
     {
-        protected override void Write(ContentWriter output, ActionScript value)
+        protected override void Write(ContentWriter output, AnimatingSprite value)
         {
-            // TODO:  Make the pipline actually work
-            // Write the name of the script
-            output.Write(value.Name);
+            output.Write(value.TextureName);
+            output.Write(value.TextureType);
+            output.WriteObject<Point>(value.FrameDimension);
+            output.Write(value.FramesPerRow);
+            output.Write(value.Padding);
 
-            // Write the list of strings
-            output.WriteObject<List<string>>(value.Commands);
+            // Optional values for sprite type, motion, and direction
+            output.Write(value.Type);
+            output.Write(value.Motion);
+            output.Write(value.Direction);
+
+            // Dictionary of all the animations
+            output.WriteObject<Dictionary<string, Animation>>(value.Sprites);
         }
     }
 }

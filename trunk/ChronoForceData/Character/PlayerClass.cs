@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using ChronoForceData.Base;
 using ChronoForceData.Items;
+using ChronoForceData.Graphics;
 #endregion
 
 namespace ChronoForceData.Character
@@ -127,7 +128,7 @@ namespace ChronoForceData.Character
         /// <param name="playerID">ID used in the party position</param>
         /// <param name="sprite">Textures used to represent the player</param>
         /// <param name="specialID">Special ID for specific players to determine skills and animations</param>
-        public PlayerClass(string name, CharacterStats stats, CharacterSprite sprite, int specialID)
+        public PlayerClass(string name, CharacterStats stats, AnimatingSprite sprite, int specialID)
             : base(name, stats, sprite)
         {
             this.specialID = specialID;

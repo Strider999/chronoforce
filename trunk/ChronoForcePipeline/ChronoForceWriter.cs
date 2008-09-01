@@ -19,7 +19,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 #endregion
 
-namespace ChronoForcePipline
+namespace ChronoForcePipeline
 {
     /// <summary>
     /// Custom pipeline writer that automatically returns the correct type for the 

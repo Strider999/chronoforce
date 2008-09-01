@@ -14,9 +14,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using ChronoForceData.Base;
+using ChronoForceData.Graphics;
 #endregion
 
-namespace ChronoForceData.Character
+namespace ChronoForceData.Graphics
 {
     #region Struct
 
@@ -53,25 +54,37 @@ namespace ChronoForceData.Character
     /// A collection of sprites and animations that represent the character.  The necessary
     /// information is loaded from the Content Manager
     /// </summary>
-    public class CharacterSprite
+    public class AnimatingSprite
     {
+        #region Constants
+
+        readonly string[] cKeys = new string[6]{"WorldFaceBack", "WorldFaceFront", "WorldFaceLeft", "WorldWalkBack", 
+                "WorldWalkFront", "WorldWalkLeft"};
+        readonly int[,] cPoints = new int[6, 2] { { 0, 0 }, { 1, 0 }, { 2, 0 }, { 0, 1 }, { 0, 2 }, { 0, 3 } };
+        readonly int[] cFrames = new int[6] { 1, 1, 1, 4, 4, 4 };
+
+        #endregion
+
         #region Fields
-        // Container to hold all the world sprites
-        Dictionary<string, AnimatedSprite> worldSprites;
-        // Container to hold all the battle sprites
-        Dictionary<string, AnimatedSprite> battleSprites;
-        // Strings for determining how to animate the character
+        // Container to hold all the world sprite frames
+        Dictionary<string, Animation> sprites;
+        // Holder for the current animation
+        Animation currentSprite;
+        // Strings for determining how to animate the sprite
         ActionString action = new ActionString();
-        // Bool for determining where the character is to determine which
-        // sprite to render
-        bool inBattle = false;
         // Bool for determining if the sprite will be mirrored.  Used mainly
         // when the character is moving right since there's only a Left sprite
         bool isMirrored = false;
         // Timer for when to advance the frame
         int spriteTimer = 0;
-        // Local copy for drawing the sprite in Draw
-        AnimatedSprite drawingSprite;
+        // Current frame of animation
+        int currentFrameValue = 0;
+        // Dimensions of a frame
+        Point frameDimension;
+        // Number of frames per row
+        int framesPerRow;
+        // Padding
+        int padding;
 
         // Camera values for rendering the sprite in respect to the camera
         Vector2 cameraPositionValue = Vector2.Zero;
@@ -82,6 +95,9 @@ namespace ChronoForceData.Character
 
         // Center of the screen for rendering sprites (reference point in respect to the camera)
         Vector2 screenCenter;
+        // Rectangle of the source sprite.  Will be reused whenever the animation is updated and
+        // calculated based on the dimensions and current frame
+        Rectangle sourceRect;
 
         // XML fields for reading from the file
         // String name of the texture to load from the content pipeline
@@ -91,9 +107,8 @@ namespace ChronoForceData.Character
         // TODO:  Need vectors and ints for texture size, animation frames, and offsets?  Or should
         // this be partially hard-coded as a standard?
 
-        // NOTE:  These should be sprite sheets and animated sprite sheets, but for now, leave it as
-        // a single texture for testing purposes.
-        Texture2D characterTexture;
+        // Texture of the sprite
+        Texture2D texture;
 
         // NOTE:  Need some sort of debugging?
         #endregion
@@ -147,20 +162,62 @@ namespace ChronoForceData.Character
 
         #endregion
 
-        #region XML CharacterSprite Properties
-
-        #endregion
-
-        #region Non-XML CharacterSprite Properties
+        #region CharacterSprite Properties
 
         /// <summary>
-        /// DEBUG:  Returns the texture that represents the character
+        /// Filename of the texture for this sprite
+        /// </summary>
+        public string TextureName
+        {
+            get { return textureName; }
+            set { textureName = value; }
+        }
+
+        /// <summary>
+        /// Type of texture being loaded, whether player, monster, or NPC
+        /// </summary>
+        public string TextureType
+        {
+            get { return textureType; }
+            set { textureType = value; }
+        }
+
+        /// <summary>
+        /// Dimensions of a frame of animation
+        /// </summary>
+        public Point FrameDimension
+        {
+            get { return frameDimension; }
+            set { frameDimension = value; }
+        }
+
+        /// <summary>
+        /// Number of animation frames per row of the texture
+        /// </summary>
+        public int FramesPerRow
+        {
+            get { return framesPerRow; }
+            set { framesPerRow = value; }
+        }
+
+        /// <summary>
+        /// Padding on each frame
+        /// </summary>
+        public int Padding
+        {
+            get { return padding; }
+            set { padding = value; }
+        }
+
+        /// <summary>
+        /// Returns the texture that represents the character
         /// </summary>
         /// <remarks>This is only a temporary function for debugging</remarks>
         [ContentSerializerIgnore]
-        public Texture2D CharacterTexture
+        public Texture2D Texture
         {
-            get { return characterTexture; }
+            get { return texture; }
+            set { texture = value; }
         }
 
         /// <summary>
@@ -170,34 +227,23 @@ namespace ChronoForceData.Character
         public ActionString Action
         {
             get { return action; }
-            set 
-            { 
-                // Special case:  If the direction is "right", make it left and
-                // mirror the sprite
+            set { 
                 action = value;
-                if (action.direction == "Right" )
-                {
-                    action.direction = "Left";
-                    isMirrored = true;
-                }
-                else
-                {
-                    isMirrored = false;
-                }
+                UpdateAnimation();
             }
         }
 
         /// <summary>
         /// Specifies what sprite type this is, either World or Battle
         /// </summary>
-        [ContentSerializerIgnore]
+        [ContentSerializer(Optional = true)]
         public string Type
         {
             get { return action.type; }
             set
             {
                 action.type = value;
-                action.fullName = action.type + action.motion + action.direction;
+                UpdateAnimation();
             }
         }
 
@@ -205,52 +251,38 @@ namespace ChronoForceData.Character
         /// Specifies whether the sprite will be in motion. "Face" means the character
         /// stands still while "Walk" animates the character walking in the direction.
         /// </summary>
-        [ContentSerializerIgnore]
+        [ContentSerializer(Optional = true)]
         public string Motion
         {
             get { return action.motion; }
             set
             {
                 action.motion = value;
-                action.fullName = action.type + action.motion + action.direction;
+                UpdateAnimation();
             }
         }
 
         /// <summary>
         /// Direction sprite to render
         /// </summary>
-        [ContentSerializerIgnore]
+        [ContentSerializer(Optional = true)]
         public string Direction
         {
             get { return action.direction; }
             set
             {
                 action.direction = value;
-
-                // Special case:  If the direction is "right", make it left and
-                // mirror the sprite
-                if (action.direction == "Right")
-                {
-                    action.direction = "Left";
-                    isMirrored = true;
-                }
-                else
-                {
-                    isMirrored = false;
-                }
-
-                action.fullName = action.type + action.motion + action.direction;
+                UpdateAnimation();
             }
         }
 
         /// <summary>
-        /// True if the character is in battle and should render battle sprites.
+        /// Dictionary holding animation data for the sprite
         /// </summary>
-        [ContentSerializerIgnore]
-        public bool InBattle
+        public Dictionary<string, Animation> Sprites
         {
-            get { return inBattle; }
-            set { inBattle = value; }
+            get { return sprites; }
+            set { sprites = value; }
         }
 
         /// <summary>
@@ -275,6 +307,17 @@ namespace ChronoForceData.Character
             set { screenCenter = value; }
         }
 
+        /// <summary>
+        /// Obtains the current frame of animation
+        /// </summary>
+        [ContentSerializerIgnore]
+        public int CurrentFrame
+        {
+            set { currentFrameValue = value; }
+            get { return currentFrameValue; }
+
+        }
+
         #endregion
 
         #endregion
@@ -284,30 +327,76 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Default contructor
         /// </summary>
-        public CharacterSprite()
+        public AnimatingSprite()
         {
-            // Initialize the dictionaries
-            worldSprites = new Dictionary<string, AnimatedSprite>();
-            battleSprites = new Dictionary<string, AnimatedSprite>();
+            // Initialize the dictionary
+            sprites = new Dictionary<string, Animation>();
+            sourceRect = new Rectangle();
 
             // Place default values into the action string
             action.type = "World";
             action.motion = "Face";
             action.direction = "Front";
+            action.fullName = "WorldFaceFront";
         }
 
         /// <summary>
         /// Constructor with a provided texture for debugging
         /// </summary>
-        public CharacterSprite(Texture2D character)
+        public AnimatingSprite(Texture2D character)
             : this()
         {
-            characterTexture = character;
+            texture = character;
         }
 
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Updates the full name of the action and obtains the current animation based on
+        /// the new full name.
+        /// </summary>
+        public void UpdateAnimation()
+        {
+            action.fullName = action.type + action.motion + action.direction;
+
+            // Make sure the dictionary actually contains the name.  The only case when this
+            // will happen is when loading the XML file and the dictionary isn't set yet.
+            if (sprites.ContainsKey(action.fullName))
+            {
+                currentSprite = sprites[action.fullName];
+
+                // Update the source rectangle
+                int actualFrame = currentSprite.StartingFrame;
+                sourceRect.Width = frameDimension.X;
+                sourceRect.Height = frameDimension.Y;
+                sourceRect.X = (actualFrame % framesPerRow) * (frameDimension.X + padding);
+                sourceRect.Y = (actualFrame / framesPerRow) * (frameDimension.Y + padding);
+            }
+        }
+
+        /**
+        /// <summary>
+        /// Loads the default sprites from the XML
+        /// </summary>
+        /// <returns>True if successful, false otherwise</returns>
+        public bool LoadCharacterSprite()
+        {
+            // NOTE:  Load the six different sprites.  Note not 8 because Right is the same as
+            // Left, only mirrored, which will be done in CharacterSprite.  The number of sprites
+            // should be a parameter though and not hard-coded as 6.
+            for (int i = 0; i < 6; i++)
+            {
+                // NOTE:  the default sprite is 32x48 px, but this should be a parameters in XML, not
+                // hard-coded.  For testing, this will work, but need to change.
+                AddWorldSprite(cKeys[i],
+                    new AnimatedSprite(characterTexture, 32, 48, 2, 4, 4,
+                        new Point(cPoints[i, 0], cPoints[i, 1]), cFrames[i]));
+            }
+
+            return true;
+        }
 
         // TODO:  Read in a specification file that has all the information for each sprite
         public bool LoadCharacterSprite(string filename)
@@ -350,7 +439,7 @@ namespace ChronoForceData.Character
         {
             battleSprites.Add(key, sprite);
         }
-
+        */
         #endregion
 
         #region Updating and Drawing
@@ -369,9 +458,18 @@ namespace ChronoForceData.Character
             {
                 spriteTimer -= ChronoConstants.cAnimationDelay * 5;
 
-                // Increment the frame
-                if (!inBattle)
-                    worldSprites[action.fullName].IncrementAnimationFrame();
+                // If this is the last frame, check to see if this animation loops.
+                if (currentSprite.IsLoop)
+                    currentFrameValue = (currentFrameValue + 1) % currentSprite.NumFrames;
+                else
+                    currentFrameValue = Math.Min(currentFrameValue++, currentSprite.NumFrames - 1);
+
+                // Get the current source rectangle
+                int actualFrame = currentFrameValue + currentSprite.StartingFrame;
+                sourceRect.Width = frameDimension.X;
+                sourceRect.Height = frameDimension.Y;
+                sourceRect.X = (actualFrame % framesPerRow) * (frameDimension.X + padding);
+                sourceRect.Y = (actualFrame / framesPerRow) * (frameDimension.Y + padding);
             }
         }
 
@@ -386,6 +484,7 @@ namespace ChronoForceData.Character
         {
             SpriteEffects effect = SpriteEffects.None;
 
+            /**
             // Checks to see what to draw depending on where the character is
             if (inBattle)
             {
@@ -398,9 +497,10 @@ namespace ChronoForceData.Character
             }
             else // Overworld sprites
             {
+             */
                 // TODO:  Need a safety check when accessing the dictionary since the string
                 // may be invalid.
-                drawingSprite = worldSprites[action.fullName];
+                //drawingSprite = worldSprites[action.fullName];
 
                 Vector2 scale = Vector2.One;
 
@@ -423,16 +523,70 @@ namespace ChronoForceData.Character
                 // Note that the origin is the position and position is the screen center.
                 // This is required to enable scaling and rotation about the center of the 
                 // screen by drawing tiles as an offset from the center coordinate
-                drawingSprite.Position = screenCenter;
-                drawingSprite.Origin = position;
-                drawingSprite.Rotation = rotationValue;
-                drawingSprite.ScaleValue = scale;
+                //drawingSprite.Position = screenCenter;
+                //drawingSprite.Origin = position;
+                //drawingSprite.Rotation = rotationValue;
+                //drawingSprite.ScaleValue = scale;
 
-                // If the sprite is mirrored, set the effect to reflect it
-                if (isMirrored)
+                // If the sprite is facing right, set the effect to reflect the left facing one
+                if (action.direction == "Right")
                     effect = SpriteEffects.FlipHorizontally;
 
-                drawingSprite.Draw(batch, color, blendMode, effect);
+                batch.Begin(blendMode, SpriteSortMode.Immediate, SaveStateMode.None);
+
+                batch.Draw(texture, screenCenter, sourceRect, color, rotationValue, position, 
+                    scaleValue, effect, 0f);
+
+                batch.End();
+
+                //drawingSprite.Draw(batch, color, blendMode, effect);
+            //}
+        }
+
+        #endregion
+
+        #region Content Type Reader
+
+        /// <summary>
+        /// Reads a character sprite from the pipeline
+        /// </summary>
+        public class CharacterSpriteReader : ContentTypeReader<AnimatingSprite>
+        {
+            /// <summary>
+            /// Reads a CharacterSprite object from the content pipeline.
+            /// </summary>
+            protected override AnimatingSprite Read(ContentReader input,
+                AnimatingSprite existingInstance)
+            {
+                AnimatingSprite charSprite = existingInstance;
+                if (existingInstance == null)
+                {
+                    charSprite = new AnimatingSprite();
+                }
+
+                charSprite.TextureName = input.ReadString();
+
+                // Load the texture and sprite
+                charSprite.Texture = input.ContentManager.Load<Texture2D>(
+                        System.IO.Path.Combine(@"Textures",
+                        charSprite.TextureName));
+                //charSprite.LoadCharacterSprite();
+
+                charSprite.TextureType = input.ReadString();
+                charSprite.FrameDimension = input.ReadObject<Point>();
+                charSprite.FramesPerRow = input.ReadInt32();
+                charSprite.Padding = input.ReadInt32();
+                charSprite.Type = input.ReadString();
+                charSprite.Motion = input.ReadString();
+                charSprite.Direction = input.ReadString();
+
+                // Read the dictionary of animations
+                charSprite.Sprites = input.ReadObject<Dictionary<string, Animation>>();
+
+                // After the animations are loaded, get the current animation to render
+                charSprite.UpdateAnimation();
+
+                return charSprite;
             }
         }
 

@@ -13,6 +13,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ChronoForceData.Base;
+using ChronoForceData.Graphics;
 #endregion
 
 namespace ChronoForceData.Character
@@ -358,7 +359,7 @@ namespace ChronoForceData.Character
         /// </summary>
         public Texture2D BattleSprite
         {
-            get { return Sprite.CharacterTexture; }
+            get { return Sprite.Texture; }
         }
 
         /// <summary>
@@ -368,11 +369,7 @@ namespace ChronoForceData.Character
         public bool InBattle
         {
             get { return inBattle; }
-            set
-            {
-                inBattle = value;
-                Sprite.InBattle = value;
-            }
+            set { inBattle = value; }
         }
 
         #endregion
@@ -417,7 +414,7 @@ namespace ChronoForceData.Character
         /// <param name="stats">Starting stats for the character</param>
         /// <param name="playerID">ID used for position in party</param>
         /// <param name="sprite">Textures that represent the character</param>
-        public CombatCharacter(string nameArg, CharacterStats stats, CharacterSprite sprite)
+        public CombatCharacter(string nameArg, CharacterStats stats, AnimatingSprite sprite)
             : base(nameArg, sprite)
         {
             this.stats = stats;
