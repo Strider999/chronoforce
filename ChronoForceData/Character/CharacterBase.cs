@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using ChronoForceData.Base;
+using ChronoForceData.Graphics;
 #endregion
 
 namespace ChronoForceData.Character
@@ -34,7 +35,7 @@ namespace ChronoForceData.Character
         Vector2 position = Vector2.Zero;  // Position to draw the character
 
         // Sprite class for the character
-        CharacterSprite sprite;
+        AnimatingSprite sprite;
         // Character name
         string name;
         // Character ID number, used for Parties and scripts
@@ -50,6 +51,7 @@ namespace ChronoForceData.Character
         public string Name
         {
             get { return name; }
+            set { name = value; }
         }
 
         /// <summary>
@@ -74,8 +76,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// The sprite representing the character
         /// </summary>
-        [ContentSerializerIgnore]
-        public CharacterSprite Sprite
+        public AnimatingSprite Sprite
         {
             get { return sprite; }
             set { sprite = value; }
@@ -84,6 +85,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Changes which sprite to render with a string key
         /// </summary>
+        [ContentSerializerIgnore]
         public ActionString SpriteAction
         {
             get { return Sprite.Action; }
@@ -106,7 +108,7 @@ namespace ChronoForceData.Character
         /// Constructor with default name and loads the provided sprite
         /// </summary>
         /// <param name="sprite">Sprite that represents the character</param>
-        public CharacterBase(CharacterSprite sprite)
+        public CharacterBase(AnimatingSprite sprite)
             : this()
         {
             this.sprite = sprite;
@@ -127,7 +129,7 @@ namespace ChronoForceData.Character
         /// </summary>
         /// <param name="nameArg">Name of the character</param>
         /// <param name="sprite">Sprite that represents the character</param>
-        public CharacterBase(string nameArg, CharacterSprite sprite)
+        public CharacterBase(string nameArg, AnimatingSprite sprite)
         {
             name = nameArg;
             id = -1;
@@ -179,7 +181,17 @@ namespace ChronoForceData.Character
             protected override CharacterBase Read(ContentReader input,
                 CharacterBase existingInstance)
             {
-                return null;
+                CharacterBase charBase = existingInstance;
+                if (existingInstance == null)
+                {
+                    charBase = new CharacterBase();
+                }
+
+                charBase.Name = input.ReadString();
+                charBase.Position = input.ReadVector2();
+                charBase.Sprite = input.ReadObject<AnimatingSprite>();
+
+                return charBase;
             }
         }
 

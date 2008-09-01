@@ -1,6 +1,17 @@
+#region File Description
+//-----------------------------------------------------------------------------
+// EnemyClass.cs
+//
+// Copyright (c) David Hsu
+//-----------------------------------------------------------------------------
+#endregion
+
+#region Using Statements
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ChronoForceData.Graphics;
+#endregion
 
 namespace ChronoForceData.Character
 {
@@ -51,7 +62,7 @@ namespace ChronoForceData.Character
         /// <param name="name">Name of the player</param>
         /// <param name="stats">Stats of the player</param>
         /// <param name="playerID">ID used in the party position</param>
-        public EnemyClass(string name, CharacterStats stats, CharacterSprite sprite)
+        public EnemyClass(string name, CharacterStats stats, AnimatingSprite sprite)
             : base(name, stats, sprite)
         {
 

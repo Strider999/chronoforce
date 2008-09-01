@@ -1,6 +1,6 @@
 #region File Description
 //-----------------------------------------------------------------------------
-// ActionScriptWriter.cs
+// CharacterBaseWriter.cs
 //
 // Microsoft XNA Community Game Platform
 // Copyright (C) David Hsu
@@ -17,7 +17,8 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
-using ChronoForceData.Actions;
+using ChronoForceData.Character;
+using ChronoForceData.Graphics;
 #endregion
 
 namespace ChronoForcePipeline
@@ -26,19 +27,17 @@ namespace ChronoForcePipeline
     /// This class will be instantiated by the XNA Framework Content Pipeline
     /// to write the specified data type into binary .xnb format.
     ///
-    /// Writes the ActionScript data
+    /// Writes the CharacterBase data
     /// </summary>
     [ContentTypeWriter]
-    public class ActionScriptWriter : ChronoForceWriter<ActionScript>
+    public class CharacterBaseWriter : ChronoForceWriter<CharacterBase>
     {
-        protected override void Write(ContentWriter output, ActionScript value)
+        protected override void Write(ContentWriter output, CharacterBase value)
         {
-            // TODO:  Make the pipline actually work
-            // Write the name of the script
+            // Write the name of the character
             output.Write(value.Name);
-
-            // Write the list of strings
-            output.WriteObject<List<string>>(value.Commands);
+            output.Write(value.Position);
+            output.WriteObject<AnimatingSprite>(value.Sprite);
         }
     }
 }

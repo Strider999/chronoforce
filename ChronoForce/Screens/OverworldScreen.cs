@@ -21,6 +21,7 @@ using ChronoForceData.Base;
 using ChronoForce.Engine;
 using ChronoForce.Parser;
 using ChronoForceData.Character;
+using ChronoForceData.Graphics;
 #endregion
 
 namespace ChronoForce.Screens
@@ -74,33 +75,11 @@ namespace ChronoForce.Screens
             // it should not try to catch up.
             ScreenManager.Game.ResetElapsedTime();
 
-            // DEBUG:  Load a character with default sprites that are hard coded.
-            // NOTE:  These sprites should be loaded inside the CharacterSprite class
-            // from a file.  This is for testing only.
             content = new ContentManager(ScreenManager.Game.Services, "Content");
 
-            Texture2D textureSprite = content.Load<Texture2D>("lockesprite");
-            CharacterSprite sprite = new CharacterSprite();
-            sprite.ScreenCenter = ChronosSetting.WindowSize / 2;
-
-            // Default values for the loop
-            string[] keys = new string[6]{"WorldFaceBack", "WorldFaceFront", "WorldFaceLeft", "WorldWalkBack", 
-                "WorldWalkFront", "WorldWalkLeft"};
-            int[,] points = new int[6, 2] { { 0, 0 }, { 1, 0 }, { 2, 0 }, { 0, 1 }, { 0, 2 }, { 0, 3 } };
-            int[] frames = new int[6] { 1, 1, 1, 4, 4, 4 };
-            // Load the six different sprites.  Note not 8 because Right is the same as
-            // Left, only mirrored, which will be done in CharacterSprite
-            for (int i = 0; i < 6; i++)
-            {
-                sprite.AddWorldSprite(keys[i], 
-                    new AnimatedSprite(textureSprite, 32, 48, 2, 4, 4, 
-                        new Point(points[i,0], points[i,1]), frames[i]));
-            }
-
-            worldSprite = new CharacterBase(sprite);
-            worldSprite.Sprite.Type = "World";
-            worldSprite.Sprite.Motion = "Face";
-            worldSprite.Sprite.Direction = "Front";
+            // DEBUG:  Load a test sprite
+            worldSprite = content.Load<CharacterBase>("TestSprite");
+            worldSprite.Sprite.ScreenCenter = ChronosSetting.WindowSize / 2;
 
             // DEBUG:  Load a map
             //gameEngine.mapEngine.loadMap("Maps\\mountaintest.map");
@@ -252,9 +231,6 @@ namespace ChronoForce.Screens
                     }
                 }
             }
-
-            // If there's no input, then the party group should remain still
-            // TODO:  Stop animation
         }
 
         #endregion
