@@ -46,11 +46,13 @@ namespace ChronoForce.Screens
         // Where the character is on the map
         Point characterPosition = Point.Zero;
 
+        // True if we want the camera to follow the party
+        bool followParty = true;
+
         // DEBUG:  Director test.
         // NOTE:  Should the directors be in the actual game session/engine instead of
         // created with every screen?
         WorldDirector director = new WorldDirector();
-        ActionString actionString;
 
         #endregion
 
@@ -83,7 +85,8 @@ namespace ChronoForce.Screens
 
             // DEBUG:  Load a map
             //gameEngine.mapEngine.loadMap("Maps\\mountaintest.map");
-            MapEngine.LoadMapEngine("Maps\\largemaptest.map", ScreenManager.GraphicsDevice, content, worldSprite);
+            MapEngine.LoadMapEngine("Maps\\largemaptest.map", ScreenManager.GraphicsDevice, content, 
+                worldSprite, director);
         }
 
 
@@ -116,11 +119,20 @@ namespace ChronoForce.Screens
 
             if (IsActive)
             {
+                // Update the engine
+                MapEngine.Update(gameTime.ElapsedGameTime.Milliseconds);
+
                 // Update the character
                 worldSprite.Update(gameTime.ElapsedGameTime.Milliseconds);
 
                 // Update the director
                 director.Update(gameTime.ElapsedGameTime.Milliseconds);
+
+                // If we're following the party, update the camera to match the party position
+                if (followParty)
+                {
+                    MapEngine.MoveCamera(worldSprite.Position);
+                }
             }
         }
 
@@ -163,6 +175,11 @@ namespace ChronoForce.Screens
                 testMessage.Add("Last part of this cool\nmessage!!");
                 ScreenManager.AddScreen(new DialogBoxScreen("Tester", testMessage,
                     DialogBoxScreen.DialogSpeed.Medium, new Vector2(100,100), new Vector2(500, 400)));
+            }
+            else if (input.IsNewKeyPress(Keys.H)) // DEBUG testing controls
+            {
+                followParty = !followParty;
+                MapEngine.AddDebugMsg("[H] Toggling follow party");
             }
 
             // Movement commands

@@ -22,7 +22,8 @@ namespace ChronoForceData.Graphics
     #region Struct
 
     /// <summary>
-    /// Sprite struct that holds three strings representing how to render the character
+    /// Sprite struct that holds three strings representing how to render the character/sprite.  For
+    /// regular sprites, only type and direction is used.  For characters, all three are used.
     /// </summary>
     public struct ActionString
     {
@@ -51,7 +52,7 @@ namespace ChronoForceData.Graphics
     #endregion
 
     /// <summary>
-    /// A collection of sprites and animations that represent the character.  The necessary
+    /// A collection of sprites and animations.  The necessary
     /// information is loaded from the Content Manager
     /// </summary>
     public class AnimatingSprite
@@ -77,8 +78,6 @@ namespace ChronoForceData.Graphics
         bool isMirrored = false;
         // Timer for when to advance the frame
         int spriteTimer = 0;
-        // Current frame of animation
-        int currentFrameValue = 0;
         // Dimensions of a frame
         Point frameDimension;
         // Number of frames per row
@@ -307,17 +306,6 @@ namespace ChronoForceData.Graphics
             set { screenCenter = value; }
         }
 
-        /// <summary>
-        /// Obtains the current frame of animation
-        /// </summary>
-        [ContentSerializerIgnore]
-        public int CurrentFrame
-        {
-            set { currentFrameValue = value; }
-            get { return currentFrameValue; }
-
-        }
-
         #endregion
 
         #endregion
@@ -349,6 +337,28 @@ namespace ChronoForceData.Graphics
             texture = character;
         }
 
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="source">AnimatingSprite to copy from</param>
+        public AnimatingSprite(AnimatingSprite source)
+        {
+            sprites = new Dictionary<string, Animation>(source.Sprites);
+            sourceRect = new Rectangle();
+
+            textureName = source.TextureName;
+            TextureType = source.TextureType;
+            texture = source.Texture;
+            frameDimension = source.FrameDimension;
+            framesPerRow = source.FramesPerRow;
+            padding = source.Padding;
+            action.type = source.Type;
+            action.motion = source.Motion;
+            action.direction  = source.Direction;
+
+            UpdateAnimation();
+        }
+
         #endregion
 
         #region Public Methods
@@ -368,78 +378,13 @@ namespace ChronoForceData.Graphics
                 currentSprite = sprites[action.fullName];
 
                 // Update the source rectangle
-                int actualFrame = currentSprite.StartingFrame;
                 sourceRect.Width = frameDimension.X;
                 sourceRect.Height = frameDimension.Y;
-                sourceRect.X = (actualFrame % framesPerRow) * (frameDimension.X + padding);
-                sourceRect.Y = (actualFrame / framesPerRow) * (frameDimension.Y + padding);
+                sourceRect.X = (currentSprite.ActualFrame % framesPerRow) * (frameDimension.X + padding);
+                sourceRect.Y = (currentSprite.ActualFrame / framesPerRow) * (frameDimension.Y + padding);
             }
         }
 
-        /**
-        /// <summary>
-        /// Loads the default sprites from the XML
-        /// </summary>
-        /// <returns>True if successful, false otherwise</returns>
-        public bool LoadCharacterSprite()
-        {
-            // NOTE:  Load the six different sprites.  Note not 8 because Right is the same as
-            // Left, only mirrored, which will be done in CharacterSprite.  The number of sprites
-            // should be a parameter though and not hard-coded as 6.
-            for (int i = 0; i < 6; i++)
-            {
-                // NOTE:  the default sprite is 32x48 px, but this should be a parameters in XML, not
-                // hard-coded.  For testing, this will work, but need to change.
-                AddWorldSprite(cKeys[i],
-                    new AnimatedSprite(characterTexture, 32, 48, 2, 4, 4,
-                        new Point(cPoints[i, 0], cPoints[i, 1]), cFrames[i]));
-            }
-
-            return true;
-        }
-
-        // TODO:  Read in a specification file that has all the information for each sprite
-        public bool LoadCharacterSprite(string filename)
-        {
-            // First, check to see if the filename has the right format
-            if (!filename.Contains(".act"))
-            {
-                Console.WriteLine("Filename doesn't end in .act");
-                return false;
-            }
-
-            // Checks to make sure the file is there
-            if (!File.Exists(filename))
-            {
-                string msg = "File " + filename + " doesn't exist";
-                Console.WriteLine(msg);
-                return false;
-            }
-
-            // TODO:  Read a file and add them into the dictionaries
-            return true;
-        }
-
-        /// <summary>
-        /// Adds an animated sprite to the character for display in the overworld screen.
-        /// </summary>
-        /// <param name="key">Key to reference this animation</param>
-        /// <param name="sprite">Animated sprite</param>
-        public void AddWorldSprite(string key, AnimatedSprite sprite)
-        {
-            worldSprites.Add(key, sprite);
-        }
-
-        /// <summary>
-        /// Adds an animated sprite to the character for display in the battle screen.
-        /// </summary>
-        /// <param name="key">Key to reference this animation</param>
-        /// <param name="sprite">Animated sprite</param>
-        public void AddBattleSprite(string key, AnimatedSprite sprite)
-        {
-            battleSprites.Add(key, sprite);
-        }
-        */
         #endregion
 
         #region Updating and Drawing
@@ -450,6 +395,10 @@ namespace ChronoForceData.Graphics
         /// <param name="elapsed"></param>
         public void Update(int elapsed)
         {
+            // If the sprite isn't looping or animating, no need to update anything
+            if (currentSprite.IsFinished)
+                return;
+
             spriteTimer += elapsed;
 
             // If the timer passed the animation delay * 5 to make the animation run at 6fps,
@@ -458,18 +407,14 @@ namespace ChronoForceData.Graphics
             {
                 spriteTimer -= ChronoConstants.cAnimationDelay * 5;
 
-                // If this is the last frame, check to see if this animation loops.
-                if (currentSprite.IsLoop)
-                    currentFrameValue = (currentFrameValue + 1) % currentSprite.NumFrames;
-                else
-                    currentFrameValue = Math.Min(currentFrameValue++, currentSprite.NumFrames - 1);
+                // Update the frame on the animation
+                currentSprite.CurrentFrame++;
 
                 // Get the current source rectangle
-                int actualFrame = currentFrameValue + currentSprite.StartingFrame;
                 sourceRect.Width = frameDimension.X;
                 sourceRect.Height = frameDimension.Y;
-                sourceRect.X = (actualFrame % framesPerRow) * (frameDimension.X + padding);
-                sourceRect.Y = (actualFrame / framesPerRow) * (frameDimension.Y + padding);
+                sourceRect.X = (currentSprite.ActualFrame % framesPerRow) * (frameDimension.X + padding);
+                sourceRect.Y = (currentSprite.ActualFrame / framesPerRow) * (frameDimension.Y + padding);
             }
         }
 
@@ -482,65 +427,45 @@ namespace ChronoForceData.Graphics
         /// <param name="position">Where to draw the sprite</param>
         public void Draw(SpriteBatch batch, Color color, SpriteBlendMode blendMode, Vector2 position)
         {
+            // First, check to see if the sprite is within the view of the camera.  If not, don't bother
+            // rendering the sprite to speed up rendering
+            if ((position.X + sourceRect.Width < CameraPosition.X - ScreenCenter.X) ||
+                (position.X - sourceRect.Width > CameraPosition.X + ScreenCenter.X) ||
+                (position.Y + sourceRect.Height < CameraPosition.Y - ScreenCenter.Y) ||
+                (position.Y - sourceRect.Height > CameraPosition.Y + ScreenCenter.Y))
+            {
+                return;
+            }
+
             SpriteEffects effect = SpriteEffects.None;
 
-            /**
-            // Checks to see what to draw depending on where the character is
-            if (inBattle)
-            {
-                batch.Begin(blendMode, SpriteSortMode.BackToFront, SaveStateMode.None);
+            Vector2 scale = Vector2.One;
 
-                // NOTE: For right now, just draw the texture for battles
-                batch.Draw(characterTexture, position, new Rectangle(0, 0, characterTexture.Width, characterTexture.Height),
-                    color, 0, Vector2.Zero, 1, SpriteEffects.None, 0f);
-                batch.End();
-            }
-            else // Overworld sprites
-            {
-             */
-                // TODO:  Need a safety check when accessing the dictionary since the string
-                // may be invalid.
-                //drawingSprite = worldSprites[action.fullName];
+            // Since position is a struct, we can change the values here without effecting the
+            // actual position.  We need to do this to convert the coordinates to
+            // camera coordinates.
+            // First, scale the positions based on the sprite scale
+            position.X *= scaleValue.X;
+            position.Y *= scaleValue.Y;
 
-                Vector2 scale = Vector2.One;
+            // Now, we get the camera position relative to the sprite's position
+            Vector2.Subtract(ref cameraPositionValue, ref position,
+                out position);
 
-                // Since position is a struct, we can change the values here without effecting the
-                // actual position.  We need to do this to convert the coordinates to
-                // camera coordinates.
-                // First, scale the positions based on the sprite scale
-                position.X *= scaleValue.X;
-                position.Y *= scaleValue.Y;
+            // Get the sprite's final size (note that scaling is done after
+            // determining the position)
+            Vector2.Multiply(ref scaleValue, zoomValue, out scale);
 
-                // Now, we get the camera position relative to the sprite's position
-                Vector2.Subtract(ref cameraPositionValue, ref position,
-                    out position);
+            // If the sprite is facing right, set the effect to reflect the left facing one
+            if (action.direction == "Right")
+                effect = SpriteEffects.FlipHorizontally;
 
-                // Get the sprite's final size (note that scaling is done after
-                // determining the position)
-                Vector2.Multiply(ref scaleValue, zoomValue, out scale);
+            batch.Begin(blendMode, SpriteSortMode.Immediate, SaveStateMode.None);
 
-                // Update the positions with world positions before drawing
-                // Note that the origin is the position and position is the screen center.
-                // This is required to enable scaling and rotation about the center of the 
-                // screen by drawing tiles as an offset from the center coordinate
-                //drawingSprite.Position = screenCenter;
-                //drawingSprite.Origin = position;
-                //drawingSprite.Rotation = rotationValue;
-                //drawingSprite.ScaleValue = scale;
+            batch.Draw(texture, screenCenter, sourceRect, color, rotationValue, position, 
+                scaleValue, effect, 0f);
 
-                // If the sprite is facing right, set the effect to reflect the left facing one
-                if (action.direction == "Right")
-                    effect = SpriteEffects.FlipHorizontally;
-
-                batch.Begin(blendMode, SpriteSortMode.Immediate, SaveStateMode.None);
-
-                batch.Draw(texture, screenCenter, sourceRect, color, rotationValue, position, 
-                    scaleValue, effect, 0f);
-
-                batch.End();
-
-                //drawingSprite.Draw(batch, color, blendMode, effect);
-            //}
+            batch.End();
         }
 
         #endregion
@@ -550,7 +475,7 @@ namespace ChronoForceData.Graphics
         /// <summary>
         /// Reads a character sprite from the pipeline
         /// </summary>
-        public class CharacterSpriteReader : ContentTypeReader<AnimatingSprite>
+        public class AnimatingSpriteReader : ContentTypeReader<AnimatingSprite>
         {
             /// <summary>
             /// Reads a CharacterSprite object from the content pipeline.
