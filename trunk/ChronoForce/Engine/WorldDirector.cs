@@ -79,6 +79,10 @@ namespace ChronoForce.Engine
             {
                 if (currentSlots[i].IsFinished)
                 {
+                    // TODO:  Better way of stopping actors after an action is finished?
+                    // If the World Director animations actors other than characters, this
+                    // will fail, nor do we always want this.
+                    currentSlots[i].Actor.Sprite.Motion = "Face";
                     currentSlots.RemoveAt(i);
                     break;
                 }

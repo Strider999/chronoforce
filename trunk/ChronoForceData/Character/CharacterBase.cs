@@ -136,6 +136,17 @@ namespace ChronoForceData.Character
             this.sprite = sprite;
         }
 
+        /// <summary>
+        /// Copy constructor that copies all the data from the source
+        /// </summary>
+        /// <param name="source">CharacterBase to copy from</param>
+        public CharacterBase(CharacterBase source)
+        {
+            name = source.Name;
+            position = source.Position;
+            sprite = new AnimatingSprite(source.Sprite);
+        }
+
         #endregion
 
         #region Updates

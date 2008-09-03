@@ -50,21 +50,40 @@ namespace ChronoForce.Engine
         #endregion
 
         #region Constants
+
         // Rate controls for the camera
         const float cMovementRate = 500f;
         const float cZoomRate = 0.5f;
         const float cRotationRate = 1.5f;
+
         // Max number of tiles
         const int cNumTiles = 200;
+
         // Delay between frames of animation
         const float cAnimationTime = 0.1f;
+
         // Default values for loading tiles
         const int cDefaultTileHeight = 40;
         const int cDefaultTileWidth = 40;
-        const int cTileOffset = 1;
+        const int cTileOffset = 1; // Padding
+
         // Maximum number of actors on a map
         const int cMaxActors = 20;
+        const int cActorMoveTime = 2000; // Time delay before moving an actor in milliseconds
         readonly Vector2 cSpriteScale = new Vector2(1f, 1f);
+
+        // FIX:  These shouldn't be here since it's already in WorldDirector.  Does this
+        // mean the World Director should keep track of the NPCs, or should there be
+        // a function in World Director that handles NPCs?
+        const int cXAmount = 39;
+        const int cYAmount = 39;
+
+        // Constant vectors of movement directions
+        readonly Vector2 cMoveUp = new Vector2(0, -cYAmount);
+        readonly Vector2 cMoveDown = new Vector2(0, cYAmount);
+        readonly Vector2 cMoveRight = new Vector2(cXAmount, 0);
+        readonly Vector2 cMoveLeft = new Vector2(-cXAmount, 0);
+
         #endregion
 
         #region Fields
@@ -88,7 +107,16 @@ namespace ChronoForce.Engine
 
         // Sprite information
         List<CharacterBase> mapActors = new List<CharacterBase>(cMaxActors);
+        // FIX:  Should the character map positions be stored in CharacterBase?  This
+        // would make the position in the XML more intuitive, or maybe the position in 
+        // the XML isn't needed?
+        Point[] mapActorsPos = new Point[cMaxActors];
+        List<ActionSlot> mapActions = new List<ActionSlot>(cMaxActors);
+        int npcTimer = 0;
         CharacterBase player;
+
+        // Random generator for moving the map actors
+        Random rand = new Random();
 
         // Flag to see if the engine has loaded anything
         bool isMapLoaded;
@@ -109,8 +137,13 @@ namespace ChronoForce.Engine
         int[] transparentColor = new int[3];
         string mapName;
         int mapWidth, mapHeight;
+        Vector2 mapSize = new Vector2();
         int[][] mapBounds;
         int[][] mapCodes;
+
+        // FIX:  WorldDirector should be created here and not passed in, but for testing
+        // we'll pass in the WorldDirector to make sure it works
+        WorldDirector director;
 
         #endregion
 
@@ -168,7 +201,7 @@ namespace ChronoForce.Engine
         }
 
         /// <summary>
-        /// Returns the current map height
+        /// Returns the current map height in tiles
         /// </summary>
         private static int MapHeight
         {
@@ -176,11 +209,19 @@ namespace ChronoForce.Engine
         }
 
         /// <summary>
-        /// Returns the current map width
+        /// Returns the current map width in tiles
         /// </summary>
         private static int MapWidth
         {
             get { return singleton.mapWidth; }
+        }
+
+        /// <summary>
+        /// Returns the current map size in pixels
+        /// </summary>
+        private static Vector2 MapSize
+        {
+            get { return singleton.mapSize; }
         }
 
         /// <summary>
@@ -307,6 +348,10 @@ namespace ChronoForce.Engine
             mapWidth = bReader.ReadByte();
             mapHeight = bReader.ReadByte();
 
+            // Store the pixel size of the map
+            mapSize.X = mapWidth * (tileWidth - cTileOffset);
+            mapSize.Y = mapHeight * (tileHeight - cTileOffset);
+
             // Load the tile grids with the information
             bottomLayer = new TileGrid(tileWidth-cTileOffset, tileHeight-cTileOffset, mapWidth, mapHeight,
                 Vector2.Zero, tileSheet, graphics, "Bottom Layer");
@@ -357,6 +402,18 @@ namespace ChronoForce.Engine
                 //bottomLayer.debugPrint();
             }
 
+            // DEBUG:  Create NPCs for testing
+            for (int i = 0; i < 2; i++)
+            {
+                CharacterBase npc = new CharacterBase(contents.Load<CharacterBase>("TestNPC"));
+                npc.Sprite.ScreenCenter = ChronosSetting.WindowSize / 2;
+                mapActorsPos[i] = new Point(i + 3, i + 3);
+                npc.Position = new Vector2(mapActorsPos[i].X * tileWidth,
+                                    mapActorsPos[i].Y * tileHeight);
+                mapActors.Add(npc);
+                mapActions.Add(new ActionSlot());
+            }
+
             // Set Up a 2D Camera
             camera = new Camera2D();
 
@@ -381,7 +438,8 @@ namespace ChronoForce.Engine
         /// <param name="playerArg">Player party to be rendered on the screen</param>
         /// <returns>True if the load succeeded, false otherwise</returns>
         public static bool LoadMapEngine(string filename, 
-            GraphicsDevice graphics, ContentManager content, CharacterBase playerArg)
+            GraphicsDevice graphics, ContentManager content, CharacterBase playerArg,
+            WorldDirector director)
         {
             // Clears any previously loaded map
             ClearMapEngine();
@@ -394,6 +452,9 @@ namespace ChronoForce.Engine
 
             // DEBUG:  Load the XML
             ActionScript tester = content.Load<ActionScript>("TestScript");
+
+            // FIX:  Store the world director
+            singleton.director = director;
 
             // Load the map file
             return singleton.LoadMap(filename);
@@ -432,12 +493,38 @@ namespace ChronoForce.Engine
                 if ( (position.Y == 0) || ((MapBounds[position.X][position.Y] & 0x01) > 0) ||
                      ((position.Y != 0) && ((MapBounds[position.X][position.Y-1] & 0x04) > 0)) )
                     return false;
+
+                // Check for NPCs
+                for (int i = 0; i < singleton.mapActors.Count; i++)
+                {
+                    if (singleton.mapActorsPos[i].X == position.X &&
+                        singleton.mapActorsPos[i].Y == position.Y - 1)
+                        return false;
+                }
+
+                // Check against the player (for NPCs)
+                if (position.X == singleton.player.Position.X &&
+                    position.Y == singleton.player.Position.Y - 1)
+                    return false;
             }
             else if (direction == MapDirection.Down)
             {
                 // If the bottom is blocked or at the edge
                 if ( (position.Y == MapHeight - 1 ) || ((MapBounds[position.X][position.Y] & 0x04) > 0) ||
                     ((position.Y != MapHeight - 1 ) && ((MapBounds[position.X][position.Y+1] & 0x01) > 0)) )
+                    return false;
+
+                // Check for NPCs
+                for (int i = 0; i < singleton.mapActors.Count; i++)
+                {
+                    if (singleton.mapActorsPos[i].X == position.X &&
+                        singleton.mapActorsPos[i].Y == position.Y + 1)
+                        return false;
+                }
+
+                // Check against the player (for NPCs)
+                if (position.X == singleton.player.Position.X &&
+                    position.Y == singleton.player.Position.Y + 1)
                     return false;
             }
             else if (direction == MapDirection.Left)
@@ -446,6 +533,19 @@ namespace ChronoForce.Engine
                 if ( (position.X == 0) || ((MapBounds[position.X][position.Y] & 0x02) > 0) ||
                      ((position.X != 0) && ((MapBounds[position.X-1][position.Y] & 0x08) > 0)) )
                     return false;
+
+                // Check for NPCs
+                for (int i = 0; i < singleton.mapActors.Count; i++)
+                {
+                    if (singleton.mapActorsPos[i].X == position.X - 1 &&
+                        singleton.mapActorsPos[i].Y == position.Y)
+                        return false;
+                }
+
+                // Check against the player (for NPCs)
+                if (position.X == singleton.player.Position.X - 1&&
+                    position.Y == singleton.player.Position.Y)
+                    return false;
             }
             else if (direction == MapDirection.Right)
             {
@@ -453,10 +553,32 @@ namespace ChronoForce.Engine
                 if ( (position.X == MapWidth - 1) || ((MapBounds[position.X][position.Y] & 0x08) > 0) ||
                     ((position.X != MapWidth - 1) && ((MapBounds[position.X+1][position.Y] & 0x02) > 0)) )
                     return false;
+
+                // Check for NPCs
+                for (int i = 0; i < singleton.mapActors.Count; i++)
+                {
+                    if (singleton.mapActorsPos[i].X == position.X + 1 &&
+                        singleton.mapActorsPos[i].Y == position.Y)
+                        return false;
+                }
+
+                // Check against the player (for NPCs)
+                if (position.X == singleton.player.Position.X + 1 &&
+                    position.Y == singleton.player.Position.Y)
+                    return false;
             }
 
             // All clear
             return true;
+        }
+
+        /// <summary>
+        /// Handles moving the player
+        /// </summary>
+        /// <param name="direction">Direction the player is moving</param>
+        public static void MovePlayer(MapDirection direction)
+        {
+
         }
 
         /// <summary>
@@ -486,6 +608,25 @@ namespace ChronoForce.Engine
                 if (Camera.Zoom < Camera2D.minZoom) Camera.Zoom = Camera2D.minZoom;
                 if (Camera.Zoom > Camera2D.maxZoom) Camera.Zoom = Camera2D.maxZoom;
             }
+        }
+
+        /// <summary>
+        /// Handles moving the camera with absolute coordinates
+        /// </summary>
+        /// <param name="pos">New position of the camera in (x,y)</param>
+        public static void MoveCamera(Vector2 pos)
+        {
+            if (Camera == null)
+                return;
+
+            // Makes sure the camera position will be within bounds.  Don't want to go 
+            // past the edge of the map
+            pos.X = MathHelper.Clamp(pos.X, ChronosSetting.WindowWidth / 2, 
+                MapSize.X - (ChronosSetting.WindowWidth / 2));
+            pos.Y = MathHelper.Clamp(pos.Y, ChronosSetting.WindowHeight / 2,
+                MapSize.Y - (ChronosSetting.WindowHeight / 2));
+
+            Camera.Position = pos;
         }
 
         /// <summary>
@@ -555,12 +696,132 @@ namespace ChronoForce.Engine
             bottomLayer.CameraPosition = camera.Position;
             player.Sprite.CameraPosition = camera.Position;
 
-            // Every time the camera changes, also update the characters
-            //player.Sprite.Origin = (camera.Position - player.Position) / cSpriteScale.X;
+            // Update the values with the NPCs
+            for (int i = 0; i < mapActors.Count; i++)
+            {
+                mapActors[i].Sprite.CameraRotation = camera.Rotation;
+                mapActors[i].Sprite.CameraZoom = camera.Zoom;
+                mapActors[i].Sprite.CameraPosition = camera.Position;
+            }
 
             //changes have been accounted for, reset the changed value so that this
             //function is not called unnecessarily
             camera.ResetChanged();
+        }
+
+        /// <summary>
+        /// Moves the NPCs around the screen
+        /// </summary>
+        private void MoveNPC()
+        {
+            int direction;
+            bool moved;
+
+            for (int i = 0; i < mapActors.Count; i++)
+            {
+                mapActions[i].Action = ActionCommand.MoveTo;
+                mapActions[i].Actor = mapActors[i];
+                mapActions[i].IsAbsolute = false;
+                mapActions[i].Frames = 30;
+                moved = false;
+
+                // Keep trying until the character can move to an empty spot
+                while (moved == false)
+                {
+                    direction = rand.Next(4);
+
+                    switch (direction)
+                    {
+                        case 0: // Up
+                            // Check to see if the character can move that direction
+                            if (MapEngine.IsPassable(mapActorsPos[i], MapDirection.Up))
+                            {
+                                mapActors[i].Sprite.Direction = "Back";
+                                mapActors[i].Sprite.Motion = "Walk";
+                                mapActorsPos[i].Y--;
+                                mapActions[i].EndPosition = cMoveUp;
+                                director.AddActionSlot(mapActions[i]);
+                                moved = true;
+                            }
+                            break;
+                        case 1: // Down
+                            // Check to see if the character can move that direction
+                            if (MapEngine.IsPassable(mapActorsPos[i], MapDirection.Down))
+                            {
+                                mapActors[i].Sprite.Direction = "Front";
+                                mapActors[i].Sprite.Motion = "Walk";
+                                mapActorsPos[i].Y++;
+                                mapActions[i].EndPosition = cMoveDown;
+                                director.AddActionSlot(mapActions[i]);
+                                moved = true;
+                            }
+                            break;
+                        case 2: // Right
+                            // Check to see if the character can move that direction
+                            if (MapEngine.IsPassable(mapActorsPos[i], MapDirection.Right))
+                            {
+                                mapActors[i].Sprite.Direction = "Right";
+                                mapActors[i].Sprite.Motion = "Walk";
+                                mapActorsPos[i].X++;
+                                mapActions[i].EndPosition = cMoveRight;
+                                director.AddActionSlot(mapActions[i]);
+                                moved = true;
+                            }
+                            break;
+                        case 3: // Left
+                            // Check to see if the character can move that direction
+                            if (MapEngine.IsPassable(mapActorsPos[i], MapDirection.Left))
+                            {
+                                mapActors[i].Sprite.Direction = "Left";
+                                mapActors[i].Sprite.Motion = "Walk";
+                                mapActorsPos[i].X--;
+                                mapActions[i].EndPosition = cMoveLeft;
+                                director.AddActionSlot(mapActions[i]);
+                                moved = true;
+                            }
+                            break;
+                    }
+                }
+
+                mapActions[i].Reset();
+            }
+        }
+
+        #endregion
+
+        #region Updating
+
+        /// <summary>
+        /// Updates the state of the map engine.
+        /// </summary>
+        /// <param name="elapsed">Milliseconds since last update</param>
+        public static void Update(int elapsed)
+        {
+            if (singleton == null)
+                return;
+
+            singleton.UpdateEngine(elapsed);
+        }
+
+        /// <summary>
+        /// Helper function for the static update function
+        /// </summary>
+        /// <param name="elapsed">Milliseconds since last update</param>
+        private void UpdateEngine(int elapsed)
+        {
+            npcTimer += elapsed;
+
+            if (npcTimer > cActorMoveTime)
+            {
+                npcTimer -= cActorMoveTime;
+                MoveNPC();
+            }
+
+            // Update the NPCs
+            for (int i = 0; i < mapActors.Count; i++)
+            {
+                mapActors[i].Update(elapsed);
+            }
         }
 
         #endregion
@@ -590,6 +851,10 @@ namespace ChronoForce.Engine
                 // Clear the screen
                 graphics.Clear(Color.Black);
 
+                // Checks to see if the camera moved
+                if (camera.IsChanged)
+                    CameraChanged();
+
                 // Renders the 3 layers for the tile map
                 if ((debugOn && showLayer[0]) || showLayer[0])
                     bottomLayer.Draw(spriteBatch);
@@ -599,6 +864,13 @@ namespace ChronoForce.Engine
                 // NOTE:  Drawing the sprite between the middle layer and top layer.
                 // This will allow the top layer to over lap for arches or other tall map
                 // structures.
+                // Draw the NPCs
+                for (int i = 0; i < mapActors.Count; i++)
+                {
+                    mapActors[i].Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
+                }
+
+                // Draw the main party
                 character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
 
                 if ((debugOn && showLayer[2]) || showLayer[2])
@@ -606,12 +878,6 @@ namespace ChronoForce.Engine
 
                 // TODO:  Load atmosphere layer that moves at a different speed than
                 // the other layers
-
-                // Checks to see if the camera moved
-                if (camera.IsChanged)
-                    CameraChanged();
-
-                //character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
 
                 // Update debug status
                 MapDebug.StatusMsg = statusMsg;
@@ -723,6 +989,15 @@ namespace ChronoForce.Engine
     " Y:" + Camera.Position.Y + "  Zoom: " + Camera.Zoom + "\n";
             singleton.StatusMsg += "Char: X=" + character.Position.X + " Y:=" + character.Position.Y + "\n";
             singleton.StatusMsg += "MapChar: X=" + pos.X + " Y=" + pos.Y;
+        }
+
+        /// <summary>
+        /// Adds a custom debug message from another class
+        /// </summary>
+        /// <param name="msg">Custom debug message to display</param>
+        public static void AddDebugMsg(string msg)
+        {
+            MapDebug.Add(msg);
         }
 
         #endregion

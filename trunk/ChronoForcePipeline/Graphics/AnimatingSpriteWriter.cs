@@ -17,11 +17,10 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
-using ChronoForceData.Character;
 using ChronoForceData.Graphics;
 #endregion
 
-namespace ChronoForcePipeline
+namespace ChronoForcePipeline.Graphics
 {
     /// <summary>
     /// This class will be instantiated by the XNA Framework Content Pipeline
@@ -30,7 +29,7 @@ namespace ChronoForcePipeline
     /// Writes the CharacterSprite data
     /// </summary>
     [ContentTypeWriter]
-    public class CharacterSpriteWriter : ChronoForceWriter<AnimatingSprite>
+    public class AnimatingSpriteWriter : ChronoForceWriter<AnimatingSprite>
     {
         protected override void Write(ContentWriter output, AnimatingSprite value)
         {

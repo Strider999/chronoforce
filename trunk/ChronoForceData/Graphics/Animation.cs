@@ -73,6 +73,38 @@ namespace ChronoForceData.Graphics
         }
 
         /// <summary>
+        /// Curretn frame of animation
+        /// </summary>
+        private int currentFrame;
+
+        /// <summary>
+        /// Current frame of animation
+        /// </summary>
+        [ContentSerializerIgnore]
+        public int CurrentFrame
+        {
+            get { return currentFrame; }
+            set { 
+                currentFrame = value;
+
+                // If this is the last frame, check to see if this animation loops.
+                if (isLoop)
+                    currentFrame = currentFrame % numFrames;
+                else
+                    currentFrame = Math.Min(currentFrame, numFrames - 1);
+            }
+        }
+
+        /// <summary>
+        /// Returns the absolute frame of the animation as a whole (current + startFrame)
+        /// </summary>
+        [ContentSerializerIgnore]
+        public int ActualFrame
+        {
+            get { return currentFrame + startingFrame; }
+        }
+
+        /// <summary>
         /// Total number of frames in this animation
         /// </summary>
         private int numFrames;
@@ -113,6 +145,17 @@ namespace ChronoForceData.Graphics
         {
             get { return isLoop; }
             set { isLoop = value; }
+        }
+
+        /// <summary>
+        /// Returns true if the animation is done
+        /// </summary>
+        public bool IsFinished
+        {
+            get
+            {
+                return (!isLoop && currentFrame >= numFrames - 1);
+            }
         }
 
         #region Constructors

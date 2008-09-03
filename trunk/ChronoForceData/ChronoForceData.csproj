@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actions\ActionLibrary.cs" />
+    <Compile Include="Actions\ActionObject.cs" />
     <Compile Include="Actions\ActionScript.cs" />
     <Compile Include="Actions\ActionSlot.cs" />
     <Compile Include="Actions\BattleText.cs" />

@@ -85,6 +85,15 @@
 					  <IsLoop>true</IsLoop>
 				  </Value>
 			  </Item>
+			  <Item>
+				  <Key>BattleFaceBack</Key>
+				  <Value>
+					  <StartingFrame>0</StartingFrame>
+					  <EndingFrame>0</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>true</IsLoop>
+				  </Value>
+			  </Item>
 		  </Sprites>
 	</Sprite>
   </Asset>
