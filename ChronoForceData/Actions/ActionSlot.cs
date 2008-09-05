@@ -24,19 +24,20 @@ namespace ChronoForceData.Actions
     public enum ActionCommand : int
     {
         MoveTo = 0,
-        DashTo = 1,
-        JumpTo = 2,
-        Wait = 3,
-        ShowAttack = 4,
-        ShowCasting = 5,
-        ShowHit = 6,
-        ShowText = 7,
-        ShowVictory = 8,
-        ShowDeath = 9,
-        Begin = 10,
-        End = 11,
-        DisplayEffect = 12,
-        TakeDamage = 13
+        WalkTo,
+        DashTo,
+        JumpTo,
+        Wait,
+        ShowAttack,
+        ShowCasting,
+        ShowHit,
+        ShowText,
+        ShowVictory,
+        ShowDeath,
+        Begin,
+        End,
+        DisplayEffect,
+        TakeDamage
     }
 
     /// <summary>
@@ -54,7 +55,7 @@ namespace ChronoForceData.Actions
 
         #region Fields
         // Character that is moving
-        CharacterBase actor;
+        ActionObject actor;
         // Type of action this slot represents
         ActionCommand actionType;
         // Battle text for rendering text on the screen.  The action will start the text
@@ -95,6 +96,7 @@ namespace ChronoForceData.Actions
         protected internal void OnComplete()
         {
             isFinished = true;
+
             if (Complete != null)
                 Complete(this, EventArgs.Empty);
         }
@@ -106,7 +108,7 @@ namespace ChronoForceData.Actions
         /// <summary>
         /// Actor that will the slot will effect
         /// </summary>
-        public CharacterBase Actor
+        public ActionObject Actor
         {
             get { return actor; }
             set { actor = value; }
@@ -203,7 +205,7 @@ namespace ChronoForceData.Actions
         /// </summary>
         /// <param name="actor">Player in this action</param>
         /// <param name="action">Action type for changing actor animation</param>
-        public ActionSlot(ActionCommand action, CharacterBase actor)
+        public ActionSlot(ActionCommand action, ActionObject actor)
         {
             this.actor = actor;
             actionType = action;
@@ -227,7 +229,7 @@ namespace ChronoForceData.Actions
         /// <param name="actor">Player in this action</param>
         /// <param name="endPosition">Ending position for a moving sprite</param>
         /// <param name="speed">Animation speed for the action.  0 means the action is instant</param>
-        public ActionSlot(ActionCommand action, CharacterBase actor, Vector2 endPosition, int speed)
+        public ActionSlot(ActionCommand action, ActionObject actor, Vector2 endPosition, int speed)
             : this(action, actor)
         {
             this.endPosition = endPosition;
@@ -242,7 +244,7 @@ namespace ChronoForceData.Actions
         /// <param name="endPosition">Ending position for a moving sprite</param>
         /// <param name="speed">Animation speed for the action.  0 means the action is instant</param>
         /// <param name="abs">Flag to set if the position is absolute</param>
-        public ActionSlot(ActionCommand action, CharacterBase actor, Vector2 endPosition, int speed, bool abs)
+        public ActionSlot(ActionCommand action, ActionObject actor, Vector2 endPosition, int speed, bool abs)
             : this(action, actor)
         {
             this.endPosition = endPosition;
@@ -256,7 +258,7 @@ namespace ChronoForceData.Actions
         /// <param name="action">Should be TakeDamage</param>
         /// <param name="actor">Player in this action</param>
         /// <param name="damage">Damage amount</param>     
-        public ActionSlot(ActionCommand action, CharacterBase actor, int damage)
+        public ActionSlot(ActionCommand action, ActionObject actor, int damage)
             : this(action, actor)
         {
             this.damage = damage;
@@ -299,7 +301,7 @@ namespace ChronoForceData.Actions
         /// Updates the time elapsed since last update and updates any positions from the related
         /// actions.
         /// </summary>
-        /// <param name="elapsed"></param>
+        /// <param name="elapsed">Time since last update in milliseconds</param>
         public void Update(int elapsed)
         {
             if (!isFinished)
@@ -315,23 +317,27 @@ namespace ChronoForceData.Actions
                 }
 
                 // Check commands for those that are independent of the actionTimer, like simple
-                // animation changes.
-                switch (actionType)
+                // animation changes.  These only apply to characters and special effects.
+                if (actor.ObjectType == ActionObjectType.Character ||
+                    actor.ObjectType == ActionObjectType.Effect)
                 {
-                    // TODO:  Change character animations
-                    case ActionCommand.ShowAttack:
-                    case ActionCommand.ShowCasting:
-                    case ActionCommand.ShowDeath:
-                    case ActionCommand.ShowVictory:
-                    case ActionCommand.ShowHit:
-                        OnComplete();
-                        break;
-                    case ActionCommand.TakeDamage:
-                        // Subtracts health from the actor
-                        //actor.HP -= damage;
-                        OnComplete();
-                        break;
-                };
+                    switch (actionType)
+                    {
+                        // TODO:  Change character animations
+                        case ActionCommand.ShowAttack:
+                        case ActionCommand.ShowCasting:
+                        case ActionCommand.ShowDeath:
+                        case ActionCommand.ShowVictory:
+                        case ActionCommand.ShowHit:
+                            OnComplete();
+                            break;
+                        case ActionCommand.TakeDamage:
+                            // Subtracts health from the actor
+                            //actor.HP -= damage;
+                            OnComplete();
+                            break;
+                    };
+                }
 
                 if (actionTimer >= cActionDelay)
                 {
@@ -344,11 +350,18 @@ namespace ChronoForceData.Actions
                         case ActionCommand.MoveTo:
                         case ActionCommand.DashTo:
                         case ActionCommand.JumpTo:
+                        case ActionCommand.WalkTo:
                             // Linearly interpolate between the current position and 
                             // the end position
                             // Will only calculate this once
                             if (!stepInitialized)
                             {
+                                // If we're walking, cast to character type and show walking animation
+                                if (actionType == ActionCommand.WalkTo)
+                                {
+                                    ((CharacterBase)actor).Sprite.Motion = "Walk";
+                                }
+
                                 // If the positioning is relative, update the endPosition to have the 
                                 // correct absolute coordinate and calculate the step-size
                                 if (!absolutePosition)
@@ -369,6 +382,13 @@ namespace ChronoForceData.Actions
                                 actionFrame > frames)
                             {
                                 actor.Position = endPosition;
+
+                                // If we're walking, cast to character type and stop animation
+                                if (actionType == ActionCommand.WalkTo)
+                                {
+                                    ((CharacterBase)actor).Sprite.Motion = "Face";
+                                }
+
                                 OnComplete();
                             }
                             break;

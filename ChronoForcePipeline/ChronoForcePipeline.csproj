@@ -36,7 +36,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actions\ActionScriptWriter.cs" />
-    <Compile Include="Actions\ActionObjectWriter.cs" />
     <Compile Include="Character\CharacterBaseWriter.cs" />
     <Compile Include="Graphics\AnimatingSpriteWriter.cs" />
     <Compile Include="ChronoForceWriter.cs" />

@@ -10,6 +10,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
@@ -343,7 +344,8 @@ namespace ChronoForceData.Graphics
         /// <param name="source">AnimatingSprite to copy from</param>
         public AnimatingSprite(AnimatingSprite source)
         {
-            sprites = new Dictionary<string, Animation>(source.Sprites);
+            //sprites = new Dictionary<string, Animation>(source.Sprites);
+            sprites = CloneDictionary<string, Animation>(source.Sprites);
             sourceRect = new Rectangle();
 
             textureName = source.TextureName;
@@ -357,6 +359,53 @@ namespace ChronoForceData.Graphics
             action.direction  = source.Direction;
 
             UpdateAnimation();
+        }
+
+        #endregion
+
+        #region Dictionary Cloning
+
+        /// <summary>
+        /// This is needed when cloning characters from a single XML file.  The reason
+        /// is value is a class, which will be referenced from all dictionaries unless
+        /// it's explicitly copied.
+        /// </summary>
+        /// <typeparam name="K"></typeparam>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="dict"></param>
+        /// <returns></returns>
+        private Dictionary<K, V> CloneDictionary<K, V>(Dictionary<K, V> dict)
+        {
+            Dictionary<K, V> newDict = null;
+
+            // The clone method is immune to the source dictionary being null.
+            if (dict != null)
+            {
+                // If the key and value are value types, clone without serialization.
+                if (((typeof(K).IsValueType || typeof(K) == typeof(string)) &&
+                     (typeof(V).IsValueType) || typeof(V) == typeof(string)))
+                {
+                    newDict = new Dictionary<K, V>();
+                    // Clone by copying the value types.
+                    foreach (KeyValuePair<K, V> kvp in dict)
+                    {
+                        newDict[kvp.Key] = kvp.Value;
+                    }
+                }
+                else
+                {
+                    // Clone by serializing to a memory stream, then deserializing.
+                    // Don't use this method if you've got a large objects, as the
+                    // BinaryFormatter produces bloat, bloat, and more bloat.
+                    BinaryFormatter bf = new BinaryFormatter();
+                    MemoryStream ms = new MemoryStream();
+                    bf.Serialize(ms, dict);
+                    ms.Position = 0;
+                    newDict = (Dictionary<K, V>)bf.Deserialize(ms);
+                }
+            }
+
+            return newDict;
         }
 
         #endregion

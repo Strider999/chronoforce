@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using ChronoForceData.Base;
 using ChronoForceData.Graphics;
+using ChronoForceData.Actions;
 #endregion
 
 namespace ChronoForceData.Character
@@ -23,7 +24,7 @@ namespace ChronoForceData.Character
     /// a loaded file.  The player class will inherit from this with more abilities and
     /// the ability to level.
     /// </summary>
-    public class CharacterBase
+    public class CharacterBase : ActionObject
     {
         #region Constants
         protected const float cTimeScale = 0.25f;
@@ -32,7 +33,6 @@ namespace ChronoForceData.Character
         #endregion
 
         #region Fields
-        Vector2 position = Vector2.Zero;  // Position to draw the character
 
         // Sprite class for the character
         AnimatingSprite sprite;
@@ -65,15 +65,6 @@ namespace ChronoForceData.Character
         }
 
         /// <summary>
-        /// The position where the character is rendered
-        /// </summary>
-        public Vector2 Position
-        {
-            get { return position; }
-            set { position = value; }
-        }
-
-        /// <summary>
         /// The sprite representing the character
         /// </summary>
         public AnimatingSprite Sprite
@@ -101,7 +92,7 @@ namespace ChronoForceData.Character
         /// </summary>
         public CharacterBase()
         {
-            name = "Unknonwn";
+            Name = "Unknonwn";
         }
 
         /// <summary>
@@ -120,7 +111,7 @@ namespace ChronoForceData.Character
         /// <param name="nameArg">Name of the character</param>
         public CharacterBase(string nameArg)
         {
-            name = nameArg;
+            Name = nameArg;
             id = -1;
         }
 
@@ -131,7 +122,7 @@ namespace ChronoForceData.Character
         /// <param name="sprite">Sprite that represents the character</param>
         public CharacterBase(string nameArg, AnimatingSprite sprite)
         {
-            name = nameArg;
+            Name = nameArg;
             id = -1;
             this.sprite = sprite;
         }
@@ -142,8 +133,8 @@ namespace ChronoForceData.Character
         /// <param name="source">CharacterBase to copy from</param>
         public CharacterBase(CharacterBase source)
         {
-            name = source.Name;
-            position = source.Position;
+            Name = source.Name;
+            Position = source.Position;
             sprite = new AnimatingSprite(source.Sprite);
         }
 
@@ -174,7 +165,7 @@ namespace ChronoForceData.Character
         public virtual void Draw(SpriteBatch batch, Color color, SpriteBlendMode blendMode)
         {
             // Passes it on to the internal sprite class for drawing
-            sprite.Draw(batch, color, blendMode, position);
+            sprite.Draw(batch, color, blendMode, Position);
         }
 
         #endregion
@@ -198,8 +189,9 @@ namespace ChronoForceData.Character
                     charBase = new CharacterBase();
                 }
 
-                charBase.Name = input.ReadString();
+                charBase.ObjectType = (ActionObjectType)input.ReadInt32();
                 charBase.Position = input.ReadVector2();
+                charBase.Name = input.ReadString();
                 charBase.Sprite = input.ReadObject<AnimatingSprite>();
 
                 return charBase;

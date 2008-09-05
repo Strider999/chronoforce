@@ -24,8 +24,11 @@ namespace ChronoForceData.Graphics
 #if !XBOX
     [DebuggerDisplay("Name = {Name}")]
 #endif
+    [Serializable]
     public class Animation
     {
+        #region Properties
+
         /// <summary>
         /// The name of the animation.
         /// </summary>
@@ -157,6 +160,8 @@ namespace ChronoForceData.Graphics
                 return (!isLoop && currentFrame >= numFrames - 1);
             }
         }
+
+        #endregion
 
         #region Constructors
 

@@ -403,7 +403,7 @@ namespace ChronoForce.Engine
             }
 
             // DEBUG:  Create NPCs for testing
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
                 CharacterBase npc = new CharacterBase(contents.Load<CharacterBase>("TestNPC"));
                 npc.Sprite.ScreenCenter = ChronosSetting.WindowSize / 2;
@@ -719,7 +719,7 @@ namespace ChronoForce.Engine
 
             for (int i = 0; i < mapActors.Count; i++)
             {
-                mapActions[i].Action = ActionCommand.MoveTo;
+                mapActions[i].Action = ActionCommand.WalkTo;
                 mapActions[i].Actor = mapActors[i];
                 mapActions[i].IsAbsolute = false;
                 mapActions[i].Frames = 30;
@@ -737,7 +737,6 @@ namespace ChronoForce.Engine
                             if (MapEngine.IsPassable(mapActorsPos[i], MapDirection.Up))
                             {
                                 mapActors[i].Sprite.Direction = "Back";
-                                mapActors[i].Sprite.Motion = "Walk";
                                 mapActorsPos[i].Y--;
                                 mapActions[i].EndPosition = cMoveUp;
                                 director.AddActionSlot(mapActions[i]);
@@ -749,7 +748,6 @@ namespace ChronoForce.Engine
                             if (MapEngine.IsPassable(mapActorsPos[i], MapDirection.Down))
                             {
                                 mapActors[i].Sprite.Direction = "Front";
-                                mapActors[i].Sprite.Motion = "Walk";
                                 mapActorsPos[i].Y++;
                                 mapActions[i].EndPosition = cMoveDown;
                                 director.AddActionSlot(mapActions[i]);
@@ -761,7 +759,6 @@ namespace ChronoForce.Engine
                             if (MapEngine.IsPassable(mapActorsPos[i], MapDirection.Right))
                             {
                                 mapActors[i].Sprite.Direction = "Right";
-                                mapActors[i].Sprite.Motion = "Walk";
                                 mapActorsPos[i].X++;
                                 mapActions[i].EndPosition = cMoveRight;
                                 director.AddActionSlot(mapActions[i]);
@@ -773,7 +770,6 @@ namespace ChronoForce.Engine
                             if (MapEngine.IsPassable(mapActorsPos[i], MapDirection.Left))
                             {
                                 mapActors[i].Sprite.Direction = "Left";
-                                mapActors[i].Sprite.Motion = "Walk";
                                 mapActorsPos[i].X--;
                                 mapActions[i].EndPosition = cMoveLeft;
                                 director.AddActionSlot(mapActions[i]);
@@ -822,6 +818,9 @@ namespace ChronoForce.Engine
             {
                 mapActors[i].Update(elapsed);
             }
+
+            // Update the Player
+            player.Update(elapsed);
         }
 
         #endregion
@@ -831,12 +830,12 @@ namespace ChronoForce.Engine
         /// <summary>
         /// Renders the game scene
         /// </summary>
-        public static void Draw(GameTime gameTime, CharacterBase character)
+        public static void Draw(GameTime gameTime)
         {
             if (singleton == null)
                 return;
 
-            singleton.DrawMap(gameTime, character);
+            singleton.DrawMap(gameTime);
         }
 
         /// <summary>
@@ -844,7 +843,7 @@ namespace ChronoForce.Engine
         /// </summary>
         /// <param name="gameTime">Time elapsed since last draw</param>
         /// <param name="character">Character to draw on the screen</param>
-        private void DrawMap(GameTime gameTime, CharacterBase character)
+        private void DrawMap(GameTime gameTime)
         {
             if (isMapLoaded)
             {
@@ -871,7 +870,7 @@ namespace ChronoForce.Engine
                 }
 
                 // Draw the main party
-                character.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
+                player.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
 
                 if ((debugOn && showLayer[2]) || showLayer[2])
                     topLayer.Draw(spriteBatch);
@@ -986,9 +985,18 @@ namespace ChronoForce.Engine
         public static void UpdateDebugMsg(CharacterBase character, Point pos)
         {
             singleton.StatusMsg = "Rotation: " + Camera.Rotation + "  Position = X:" + Camera.Position.X +
-    " Y:" + Camera.Position.Y + "  Zoom: " + Camera.Zoom + "\n";
+                " Y:" + Camera.Position.Y + "  Zoom: " + Camera.Zoom + "\n";
             singleton.StatusMsg += "Char: X=" + character.Position.X + " Y:=" + character.Position.Y + "\n";
-            singleton.StatusMsg += "MapChar: X=" + pos.X + " Y=" + pos.Y;
+            singleton.StatusMsg += "MapChar: X=" + pos.X + " Y=" + pos.Y + "\n";
+
+            /**
+            for (int i = 0; i < singleton.mapActors.Count; i++)
+            {
+                singleton.StatusMsg += "NPC #" + (i+1) +": Type=" + singleton.mapActors[i].Sprite.Type +
+                    " Motion=" + singleton.mapActors[i].Sprite.Motion + " Direction=" +
+                    singleton.mapActors[i].Sprite.Direction + "\n";
+            }
+             */
         }
 
         /// <summary>

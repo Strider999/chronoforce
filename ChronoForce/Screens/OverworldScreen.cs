@@ -119,14 +119,14 @@ namespace ChronoForce.Screens
 
             if (IsActive)
             {
+                // Update the director
+                director.Update(gameTime.ElapsedGameTime.Milliseconds);
+
                 // Update the engine
                 MapEngine.Update(gameTime.ElapsedGameTime.Milliseconds);
 
                 // Update the character
-                worldSprite.Update(gameTime.ElapsedGameTime.Milliseconds);
-
-                // Update the director
-                director.Update(gameTime.ElapsedGameTime.Milliseconds);
+                //worldSprite.Update(gameTime.ElapsedGameTime.Milliseconds);
 
                 // If we're following the party, update the camera to match the party position
                 if (followParty)
@@ -144,6 +144,7 @@ namespace ChronoForce.Screens
         /// Lets the game respond to player input. Unlike the Update method,
         /// this will only be called when the gameplay screen is active.
         /// </summary>
+        /// <param name="elapsed">Time since last update in seconds</param>
         public override void HandleInput(InputState input, int elapsed)
         {
             if (input == null)
@@ -188,13 +189,11 @@ namespace ChronoForce.Screens
                 if (!director.PartyMoving)
                 {
                     // First, change the character to face that direction
-                    worldSprite.Sprite.Motion = "Face";
                     worldSprite.Sprite.Direction = "Front";
 
                     // Next, Check to see if the character can move that direction
                     if (MapEngine.IsPassable(characterPosition, MapDirection.Down))
                     {
-                        worldSprite.Sprite.Motion = "Walk";
                         characterPosition.Y++;
                         director.MoveParty(worldSprite, MapDirection.Down);
                     }
@@ -205,12 +204,10 @@ namespace ChronoForce.Screens
                 if (!director.PartyMoving)
                 {
                     // Change the direction of the character
-                    worldSprite.Sprite.Motion = "Face";
                     worldSprite.Sprite.Direction = "Back";
 
                     if (MapEngine.IsPassable(characterPosition, MapDirection.Up))
                     {
-                        worldSprite.Sprite.Motion = "Walk";
                         characterPosition.Y--;
                         director.MoveParty(worldSprite, MapDirection.Up);
                     }
@@ -221,12 +218,10 @@ namespace ChronoForce.Screens
                 if (!director.PartyMoving)
                 {
                     // Change the direction of the character
-                    worldSprite.Sprite.Motion = "Face";
                     worldSprite.Sprite.Direction = "Left";
 
                     if (MapEngine.IsPassable(characterPosition, MapDirection.Left))
                     {
-                        worldSprite.Sprite.Motion = "Walk";
                         characterPosition.X--;
                         director.MoveParty(worldSprite, MapDirection.Left);
                     }
@@ -237,12 +232,10 @@ namespace ChronoForce.Screens
                 if (!director.PartyMoving)
                 {
                     // Change the direction of the character
-                    worldSprite.Sprite.Motion = "Face";
                     worldSprite.Sprite.Direction = "Right";
 
                     if (MapEngine.IsPassable(characterPosition, MapDirection.Right))
                     {
-                        worldSprite.Sprite.Motion = "Walk";
                         characterPosition.X++;
                         director.MoveParty(worldSprite, MapDirection.Right);
                     }
@@ -265,7 +258,7 @@ namespace ChronoForce.Screens
             // Draw the game engine and character sprite
             // NOTE:  We pass the sprite in so the sprite can be draw in between
             // map layers for additional effect.
-            MapEngine.Draw(gameTime, worldSprite);
+            MapEngine.Draw(gameTime);
 
             // If the game is transitioning on or off, fade it out to black.
             if (TransitionPosition > 0)
