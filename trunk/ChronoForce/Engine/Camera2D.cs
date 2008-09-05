@@ -4,6 +4,8 @@
 //
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
+// Modified by David Hsu
+// - Now inherits from ActionObject
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -16,6 +18,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
+using ChronoForceData.Actions;
 #endregion
 
 namespace ChronoForce.Engine
@@ -30,10 +33,9 @@ namespace ChronoForce.Engine
         ZAxis
     };
 
-    public class Camera2D
+    public class Camera2D : ActionObject
     {
         #region Fields
-        private Vector2 positionValue;
         private bool isMovingUsingScreenAxis;
         private float rotationValue;
         private float zoomValue;
@@ -49,7 +51,7 @@ namespace ChronoForce.Engine
         /// <summary>
         /// Get/Set the postion value of the camera
         /// </summary>
-        public Vector2 Position
+        public override Vector2 Position
         {
             set
             {

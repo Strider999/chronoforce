@@ -10,6 +10,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 #endregion
 
@@ -37,42 +38,30 @@ namespace ChronoForceData.Actions
         /// <summary>
         /// Type of object the action is applying to
         /// </summary>
-        private int objectType;
+        private ActionObjectType objectType;
 
         /// <summary>
         /// Type of object the action is applying to
         /// </summary>
-        public int ObjectType
+        public ActionObjectType ObjectType
         {
             get { return objectType; }
             set { objectType = value; }
         }
 
-        #endregion
-
-        #region Content Type Reader
+        /// <summary>
+        /// Position of the object
+        /// </summary>
+        protected Vector2 positionValue;
 
         /// <summary>
-        /// Reads an action object from the pipeline
+        /// Position of the object
         /// </summary>
-        public class ActionObjectReader : ContentTypeReader<ActionObject>
+        [ContentSerializer(Optional = true)]
+        public virtual Vector2 Position
         {
-            /// <summary>
-            /// Reads an ActionObject from the content pipeline.
-            /// </summary>
-            protected override ActionObject Read(ContentReader input,
-                ActionObject existingInstance)
-            {
-                ActionObject actObj = existingInstance;
-                if (existingInstance == null)
-                {
-                    actObj = new ActionObject();
-                }
-
-                actObj.ObjectType = input.ReadInt32();
-
-                return actObj;
-            }
+            get { return positionValue; }
+            set { positionValue = value; }
         }
 
         #endregion

@@ -79,10 +79,6 @@ namespace ChronoForce.Engine
             {
                 if (currentSlots[i].IsFinished)
                 {
-                    // TODO:  Better way of stopping actors after an action is finished?
-                    // If the World Director animations actors other than characters, this
-                    // will fail, nor do we always want this.
-                    currentSlots[i].Actor.Sprite.Motion = "Face";
                     currentSlots.RemoveAt(i);
                     break;
                 }
@@ -96,8 +92,7 @@ namespace ChronoForce.Engine
         /// <param name="e"></param>
         void PartyMoveHandler(object o, EventArgs e)
         {
-            // TODO:  Maybe a better way of doing this?  Too many accessors
-            moveSlot.Actor.Sprite.Motion = "Face";
+            // Nothing for now
         }
 
         #endregion
@@ -142,7 +137,7 @@ namespace ChronoForce.Engine
         /// <param name="direction">Direction to move the party</param>
         public void MoveParty(CharacterBase actor, MapDirection direction)
         {
-            moveSlot.Action = ActionCommand.MoveTo;
+            moveSlot.Action = ActionCommand.WalkTo;
             moveSlot.Actor = actor;
             moveSlot.IsAbsolute = false;
             moveSlot.Frames = cDefaultMoveFrame;
@@ -165,7 +160,7 @@ namespace ChronoForce.Engine
 
             // Mark that the moveSlot is active again
             moveSlot.Reset();
-            moveSlot.Complete += PartyMoveHandler;
+            //moveSlot.Complete += PartyMoveHandler;
         }
 
         /// <summary>
@@ -176,7 +171,7 @@ namespace ChronoForce.Engine
         /// <param name="speed">Number of frames to move the actor</param>
         public void MoveParty(CharacterBase actor, MapDirection direction, int frames)
         {
-            moveSlot.Action = ActionCommand.MoveTo;
+            moveSlot.Action = ActionCommand.WalkTo;
             moveSlot.Actor = actor;
             moveSlot.IsAbsolute = false;
             moveSlot.Frames = frames;
@@ -199,7 +194,7 @@ namespace ChronoForce.Engine
 
             // Mark that the moveSlot is active again
             moveSlot.Reset();
-            moveSlot.Complete += PartyMoveHandler;
+            //moveSlot.Complete += PartyMoveHandler;
         }
 
         #endregion
