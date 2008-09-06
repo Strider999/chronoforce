@@ -36,6 +36,20 @@ namespace ChronoForceData.Actions
         #region Properties
 
         /// <summary>
+        /// Name of the object
+        /// </summary>
+        private string name;
+
+        /// <summary>
+        /// Name of the object
+        /// </summary>
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+
+        /// <summary>
         /// Type of object the action is applying to
         /// </summary>
         private ActionObjectType objectType;

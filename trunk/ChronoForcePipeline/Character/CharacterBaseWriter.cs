@@ -35,13 +35,15 @@ namespace ChronoForcePipeline
         protected override void Write(ContentWriter output, CharacterBase value)
         {
             // Write the name of the character
+            output.Write(value.Name);
+
             // Write the object type
             output.Write((int)value.ObjectType);
 
             // Write the object position
             output.Write(value.Position);
+            output.WriteObject<Point>(value.MapPosition);
 
-            output.Write(value.Name);
             output.WriteObject<AnimatingSprite>(value.Sprite);
         }
     }

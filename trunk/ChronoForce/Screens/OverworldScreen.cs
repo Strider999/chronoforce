@@ -188,57 +188,28 @@ namespace ChronoForce.Screens
             {
                 if (!director.PartyMoving)
                 {
-                    // First, change the character to face that direction
-                    worldSprite.Sprite.Direction = "Front";
-
-                    // Next, Check to see if the character can move that direction
-                    if (MapEngine.IsPassable(characterPosition, MapDirection.Down))
-                    {
-                        characterPosition.Y++;
-                        director.MoveParty(worldSprite, MapDirection.Down);
-                    }
+                    MapEngine.MovePlayer(MapDirection.Down);
                 }
             }
             if (input.PressedUpKey)
             {
                 if (!director.PartyMoving)
                 {
-                    // Change the direction of the character
-                    worldSprite.Sprite.Direction = "Back";
-
-                    if (MapEngine.IsPassable(characterPosition, MapDirection.Up))
-                    {
-                        characterPosition.Y--;
-                        director.MoveParty(worldSprite, MapDirection.Up);
-                    }
+                    MapEngine.MovePlayer(MapDirection.Up);
                 }
             }
             if (input.PressedLeftKey)
             {
                 if (!director.PartyMoving)
                 {
-                    // Change the direction of the character
-                    worldSprite.Sprite.Direction = "Left";
-
-                    if (MapEngine.IsPassable(characterPosition, MapDirection.Left))
-                    {
-                        characterPosition.X--;
-                        director.MoveParty(worldSprite, MapDirection.Left);
-                    }
+                    MapEngine.MovePlayer(MapDirection.Left);
                 }
             }
             if (input.PressedRightKey)
             {
                 if (!director.PartyMoving)
                 {
-                    // Change the direction of the character
-                    worldSprite.Sprite.Direction = "Right";
-
-                    if (MapEngine.IsPassable(characterPosition, MapDirection.Right))
-                    {
-                        characterPosition.X++;
-                        director.MoveParty(worldSprite, MapDirection.Right);
-                    }
+                    MapEngine.MovePlayer(MapDirection.Right);
                 }
             }
         }

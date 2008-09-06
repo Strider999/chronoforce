@@ -36,22 +36,22 @@ namespace ChronoForceData.Character
 
         // Sprite class for the character
         AnimatingSprite sprite;
-        // Character name
-        string name;
         // Character ID number, used for Parties and scripts
         int id;
+        // Map position of the character
+        Point mapPosition = new Point();
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Name of the character
+        /// Character position on the map matrix
         /// </summary>
-        public string Name
+        public Point MapPosition
         {
-            get { return name; }
-            set { name = value; }
+            get { return mapPosition; }
+            set { mapPosition = value; }
         }
 
         /// <summary>
@@ -140,6 +140,22 @@ namespace ChronoForceData.Character
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// Accessor function that changes the map position of the character.  Needed
+        /// since the regular properties won't work directly.
+        /// </summary>
+        /// <param name="x">New row position</param>
+        /// <param name="y">New col position</param>
+        public void SetMapPosition(int x, int y)
+        {
+            mapPosition.X = x;
+            mapPosition.Y = y;
+        }
+
+        #endregion
+
         #region Updates
 
         /// <summary>
@@ -189,9 +205,10 @@ namespace ChronoForceData.Character
                     charBase = new CharacterBase();
                 }
 
+                charBase.Name = input.ReadString();
                 charBase.ObjectType = (ActionObjectType)input.ReadInt32();
                 charBase.Position = input.ReadVector2();
-                charBase.Name = input.ReadString();
+                charBase.MapPosition = input.ReadObject<Point>();
                 charBase.Sprite = input.ReadObject<AnimatingSprite>();
 
                 return charBase;
