@@ -5,6 +5,7 @@
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
 // Modified by David Hsu
+// - Added function to set the position without having to create a new Vector2
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -188,6 +189,17 @@ namespace ChronoForce.Engine
         public void SetTile(int xIndex, int yIndex, int tile)
         {
             grid[xIndex][yIndex] = tile;
+        }
+
+        /// <summary>
+        /// Sets the current position of the tile grid
+        /// </summary>
+        /// <param name="x">Position on the x axis</param>
+        /// <param name="y">Position on the y axis</param>
+        public void SetPosition(int x, int y)
+        {
+            worldOffset.X = x;
+            worldOffset.Y = y;
         }
 
         /// <summary>
