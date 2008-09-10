@@ -73,15 +73,15 @@ namespace ChronoForce.Engine
         readonly Vector2 cSpriteScale = new Vector2(1f, 1f);
 
         // Cinamtic time delay for each frame
-        const int cCinematicTime = 333;
+        const int cCinematicTime = 2;
         // Fade amount for each frame
-        const int cFadeAmount = 8; // Roughly 1 second
+        const int cFadeAmount = 5;
 
         // FIX:  These shouldn't be here since it's already in WorldDirector.  Does this
         // mean the World Director should keep track of the NPCs, or should there be
         // a function in World Director that handles NPCs?
-        const int cXAmount = 39;
-        const int cYAmount = 39;
+        const int cXAmount = 40;
+        const int cYAmount = 40;
 
         // Constant vectors of movement directions
         readonly Vector2 cMoveUp = new Vector2(0, -cYAmount);
@@ -194,7 +194,7 @@ namespace ChronoForce.Engine
         }
 
         /// <summary>
-        /// Returns the 2D array of map boundaries
+        /// Returns the 2D array of map boundaries of the current map
         /// </summary>
         private static int[][] MapBounds
         {
@@ -219,7 +219,7 @@ namespace ChronoForce.Engine
         }
 
         /// <summary>
-        /// Returns the current map height in tiles
+        /// Returns the current map height in tiles of the current map
         /// </summary>
         private static int MapHeight
         {
@@ -227,7 +227,7 @@ namespace ChronoForce.Engine
         }
 
         /// <summary>
-        /// Returns the current map width in tiles
+        /// Returns the current map width in tiles of the current map
         /// </summary>
         private static int MapWidth
         {
@@ -235,7 +235,7 @@ namespace ChronoForce.Engine
         }
 
         /// <summary>
-        /// Returns the current map size in pixels
+        /// Returns the current map size in pixels of the current map
         /// </summary>
         private static Vector2 MapSize
         {
@@ -369,11 +369,12 @@ namespace ChronoForce.Engine
 
             // Seperate the tileSheet into the proper tiles
             int counter = 0;
-            for (int i = 0; i < tileTexture.Height; i += tileHeight)
+            for (int i = 0; i < tileTexture.Height; i += tileHeight + (cTileOffset * 2))
             {
-                for (int j = 0; j < tileTexture.Width; j += tileWidth)
+                for (int j = 0; j < tileTexture.Width; j += tileWidth + (cTileOffset * 2))
                 {
-                    tileSheet.AddSourceSprite(counter, new Rectangle(j, i, tileWidth, tileHeight));
+                    tileSheet.AddSourceSprite(counter, new Rectangle(j + cTileOffset, i + cTileOffset, 
+                        tileWidth, tileHeight) );
                     counter++;
                 }
             }
@@ -395,16 +396,15 @@ namespace ChronoForce.Engine
                 mapHeight.Add(bReader.ReadByte());
 
                 // Store the pixel size of the map
-                mapSize.Add( new Vector2(mapWidth[i] * (tileWidth - cTileOffset), 
-                    mapHeight[i] * (tileHeight - cTileOffset)) );
+                mapSize.Add( new Vector2(mapWidth[i] * tileWidth, mapHeight[i] * tileHeight) );
 
                 // Load the tile grids with the information
-                bottomLayer.Add(new TileGrid(tileWidth - cTileOffset, tileHeight - cTileOffset, 
-                    mapWidth[i], mapHeight[i], Vector2.Zero, tileSheet, graphics, "Bottom Layer"));
-                middleLayer.Add(new TileGrid(tileWidth - cTileOffset, tileHeight - cTileOffset, 
-                    mapWidth[i], mapHeight[i], Vector2.Zero, tileSheet, graphics, "Middle Layer"));
-                topLayer.Add(new TileGrid(tileWidth - cTileOffset, tileHeight - cTileOffset, 
-                    mapWidth[i], mapHeight[i], Vector2.Zero, tileSheet, graphics, "Top Layer"));
+                bottomLayer.Add(new TileGrid(tileWidth, tileHeight, 
+                    mapWidth[i], mapHeight[i], Vector2.One, tileSheet, graphics, "Bottom Layer"));
+                middleLayer.Add(new TileGrid(tileWidth, tileHeight, 
+                    mapWidth[i], mapHeight[i], Vector2.One, tileSheet, graphics, "Middle Layer"));
+                topLayer.Add(new TileGrid(tileWidth, tileHeight, 
+                    mapWidth[i], mapHeight[i], Vector2.One, tileSheet, graphics, "Top Layer"));
 
                 // Initialize the map matrices
                 mapBounds.Add(new int[mapWidth[i]][]);
@@ -450,7 +450,7 @@ namespace ChronoForce.Engine
             }
 
             // DEBUG:  Create NPCs for testing
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 0; i++)
             {
                 CharacterBase npc = new CharacterBase(contents.Load<CharacterBase>("TestNPC"));
                 npc.Sprite.ScreenCenter = ChronosSetting.WindowSize / 2;
@@ -659,6 +659,9 @@ namespace ChronoForce.Engine
                 Player.SetMapPosition(Player.MapPosition.X + dx,
                     Player.MapPosition.Y + dy);
                 Director.MoveParty(Player, direction);
+
+                // Check any map codes in the area
+                singleton.CheckMapCode(direction);
             }
         }
 
@@ -701,11 +704,15 @@ namespace ChronoForce.Engine
                 return;
 
             // Makes sure the camera position will be within bounds.  Don't want to go 
-            // past the edge of the map
-            pos.X = MathHelper.Clamp(pos.X, ChronosSetting.WindowWidth / 2, 
-                MapSize.X - (ChronosSetting.WindowWidth / 2));
-            pos.Y = MathHelper.Clamp(pos.Y, ChronosSetting.WindowHeight / 2,
-                MapSize.Y - (ChronosSetting.WindowHeight / 2));
+            // past the edge of the map.  This only applies to the main map and not
+            // the interior maps
+            if (singleton.currentMap == 0)
+            {
+                pos.X = MathHelper.Clamp(pos.X, ChronosSetting.WindowWidth / 2,
+                    MapSize.X - (ChronosSetting.WindowWidth / 2));
+                pos.Y = MathHelper.Clamp(pos.Y, ChronosSetting.WindowHeight / 2,
+                    MapSize.Y - (ChronosSetting.WindowHeight / 2));
+            }
 
             Camera.Position = pos;
         }
@@ -883,13 +890,19 @@ namespace ChronoForce.Engine
         /// </summary>
         /// <remarks>This will check for more codes later on, including
         /// in-game cinematics, quest objects, and event triggered items from a file.</remarks>
-        private void CheckMapCode()
+        private void CheckMapCode(MapDirection direction)
         {
             // Check the current position of the player
             if (mapCodes[currentMap][player.MapPosition.X][player.MapPosition.Y] == 1)
             {
                 // Start transitioning to the new map
+                lastMap = currentMap;
+                currentMap = (currentMap + 1) % 2;
 
+                inCinematic = true;
+
+                // Transition the map
+                TransitionMap(direction);
             }
         }
 
@@ -900,7 +913,56 @@ namespace ChronoForce.Engine
         /// <param name="direction">Direction the character moved into the area</param>
         private void TransitionMap(MapDirection direction)
         {
+            // First, find the entrace to the new map so we can position the character and
+            // map correctly with respect to the camera view
+            // TODO:  Should pass in the code ID to search for since the code will be different
+            // depending on the map.  For now, only test for one.
+            int newRow = -1;
+            int newCol = -1;
+            for (int i = 0; i < mapWidth[currentMap]; i++)
+            {
+                for (int j = 0; j < mapHeight[currentMap]; j++)
+                {
+                    if (mapCodes[currentMap][i][j] == 1)
+                    {
+                        newCol = i;
+                        newRow = j;
+                        break;
+                    }
+                }
 
+                if (newRow != -1 && newCol != -1)
+                    break;
+            }
+
+            // Adjust the character position
+            switch (direction)
+            {
+                case MapDirection.Down:
+                    player.SetMapPosition(newCol, newRow + 1);
+                    break;
+                case MapDirection.Up:
+                    player.SetMapPosition(newCol, newRow - 1);
+                    break;
+                case MapDirection.Left:
+                    player.SetMapPosition(newCol - 1, newRow);
+                    break;
+                case MapDirection.Right:
+                    player.SetMapPosition(newCol + 1, newRow);
+                    break;
+            }
+
+            // Shift the map to a new position in respect to the camera so the character moves
+            // to the right spot
+            bottomLayer[currentMap].SetPosition( (int)camera.Position.X - (newCol * (tileWidth - cTileOffset)), 
+                (int)camera.Position.Y - (newRow * (tileHeight - cTileOffset)) );
+            middleLayer[currentMap].SetPosition((int)camera.Position.X - (newCol * (tileWidth - cTileOffset)),
+                (int)camera.Position.Y - (newRow * (tileHeight - cTileOffset)));
+            topLayer[currentMap].SetPosition((int)camera.Position.X - (newCol * (tileWidth - cTileOffset)),
+                (int)camera.Position.Y - (newRow * (tileHeight - cTileOffset)));
+
+            // Make sure the camera is set on the other map
+            //CameraChanged();
         }
 
         #endregion
@@ -951,6 +1013,7 @@ namespace ChronoForce.Engine
                         inCinematic = false;
                         fadeColor[0] = 255;
                         fadeColor[1] = 0;
+                        lastMap = currentMap;
                     }
                 }
             }
@@ -1158,7 +1221,8 @@ namespace ChronoForce.Engine
             singleton.StatusMsg = "Rotation: " + Camera.Rotation + "  Position = X:" + Camera.Position.X +
                 " Y:" + Camera.Position.Y + "  Zoom: " + Camera.Zoom + "\n";
             singleton.StatusMsg += "Char: X=" + character.Position.X + " Y:=" + character.Position.Y + "\n";
-            singleton.StatusMsg += "MapChar: X=" + pos.X + " Y=" + pos.Y + "\n";
+            singleton.StatusMsg += "MapChar: X=" + singleton.player.MapPosition.X + " Y=" + 
+                singleton.player.MapPosition.Y + "\n";
 
             /**
             for (int i = 0; i < singleton.mapActors.Count; i++)

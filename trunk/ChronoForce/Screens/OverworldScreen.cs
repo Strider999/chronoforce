@@ -85,7 +85,7 @@ namespace ChronoForce.Screens
 
             // DEBUG:  Load a map
             //gameEngine.mapEngine.loadMap("Maps\\mountaintest.map");
-            MapEngine.LoadMapEngine("Maps\\largemaptest.map", ScreenManager.GraphicsDevice, content, 
+            MapEngine.LoadMapEngine("Maps\\newmaptest.map", ScreenManager.GraphicsDevice, content, 
                 worldSprite, director);
         }
 

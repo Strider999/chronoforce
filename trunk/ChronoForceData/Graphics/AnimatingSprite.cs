@@ -512,7 +512,7 @@ namespace ChronoForceData.Graphics
             batch.Begin(blendMode, SpriteSortMode.Immediate, SaveStateMode.None);
 
             batch.Draw(texture, screenCenter, sourceRect, color, rotationValue, position, 
-                scaleValue, effect, 0f);
+                scale, effect, 0f);
 
             batch.End();
         }
