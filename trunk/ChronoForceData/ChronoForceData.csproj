@@ -40,6 +40,7 @@
     <Compile Include="Actions\ActionScript.cs" />
     <Compile Include="Actions\ActionSlot.cs" />
     <Compile Include="Actions\BattleText.cs" />
+    <Compile Include="Map\MapCodeAction.cs" />
     <Compile Include="Graphics\AnimatingSprite.cs" />
     <Compile Include="Graphics\Animation.cs" />
     <Compile Include="Character\CharacterNPC.cs" />

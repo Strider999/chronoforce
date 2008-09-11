@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Actions\ActionScriptWriter.cs" />
     <Compile Include="Character\CharacterBaseWriter.cs" />
+    <Compile Include="Character\CharacterNPCWriter.cs" />
     <Compile Include="Graphics\AnimatingSpriteWriter.cs" />
     <Compile Include="ChronoForceWriter.cs" />
     <Compile Include="Graphics\AnimationWriter.cs" />

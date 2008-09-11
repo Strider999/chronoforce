@@ -87,6 +87,19 @@ namespace ChronoForce.Engine
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// Adds a new action script to the queue
+        /// </summary>
+        /// <param name="script">Script to run</param>
+        public void AddActionScript(ActionScript script)
+        {
+            actions.Enqueue(script);
+        }
+
+        #endregion
+
         #region Private Methods
 
         /// <summary>

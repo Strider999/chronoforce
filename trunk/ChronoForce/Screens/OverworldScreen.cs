@@ -46,9 +46,6 @@ namespace ChronoForce.Screens
         // Where the character is on the map
         Point characterPosition = Point.Zero;
 
-        // True if we want the camera to follow the party
-        bool followParty = true;
-
         // DEBUG:  Director test.
         // NOTE:  Should the directors be in the actual game session/engine instead of
         // created with every screen?
@@ -87,6 +84,8 @@ namespace ChronoForce.Screens
             //gameEngine.mapEngine.loadMap("Maps\\mountaintest.map");
             MapEngine.LoadMapEngine("Maps\\newmaptest.map", ScreenManager.GraphicsDevice, content, 
                 worldSprite, director);
+
+            MapEngine.FollowParty = true;
         }
 
 
@@ -127,12 +126,6 @@ namespace ChronoForce.Screens
 
                 // Update the character
                 //worldSprite.Update(gameTime.ElapsedGameTime.Milliseconds);
-
-                // If we're following the party, update the camera to match the party position
-                if (followParty)
-                {
-                    MapEngine.MoveCamera(worldSprite.Position);
-                }
             }
         }
 
@@ -179,7 +172,7 @@ namespace ChronoForce.Screens
             }
             else if (input.IsNewKeyPress(Keys.H)) // DEBUG testing controls
             {
-                followParty = !followParty;
+                MapEngine.FollowParty = !MapEngine.FollowParty;
                 MapEngine.AddDebugMsg("[H] Toggling follow party");
             }
 
