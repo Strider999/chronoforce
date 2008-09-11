@@ -372,7 +372,7 @@ namespace ChronoForce.Engine
                         // spot for that layer), don't render anything
                         if (validTile)
                             batch.Draw(sheet.Texture, screenCenter, sourceRect, layerColor,
-                                rotationValue, position, scale, SpriteEffects.None, 0.0f);
+                                rotationValue, position, scale, SpriteEffects.None, 1f);
                     }
                 }
             }

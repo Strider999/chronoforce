@@ -37,7 +37,7 @@ namespace ChronoForceData.Character
         // Sprite class for the character
         AnimatingSprite sprite;
         // Character ID number, used for Parties and scripts
-        int id;
+        int id = -1;
         // Map position of the character
         Point mapPosition = new Point();
 
@@ -152,6 +152,19 @@ namespace ChronoForceData.Character
         {
             mapPosition.X = x;
             mapPosition.Y = y;
+        }
+
+        /// <summary>
+        /// Accessor function that changes the map position of the character by
+        /// relative movement.  Needed since the regular properties won't work
+        /// directly.
+        /// </summary>
+        /// <param name="dx">Change in x</param>
+        /// <param name="dy">Change in y</param>
+        public void MoveMapPosition(int dx, int dy)
+        {
+            mapPosition.X += dx;
+            mapPosition.Y += dy;
         }
 
         #endregion

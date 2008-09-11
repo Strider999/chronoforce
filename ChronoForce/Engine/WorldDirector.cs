@@ -57,11 +57,11 @@ namespace ChronoForce.Engine
         // time or at intersecting times.
         List<ActionSlot> currentSlots = new List<ActionSlot>(cMaxSlots);
 
-        // Local action slot that will be reused to move the main part around the place
-        ActionSlot moveSlot = new ActionSlot();
+        // List of action slots for moving NPCs around the world
+        List<ActionSlot> npcSlots = new List<ActionSlot>(cMaxSlots);
 
-        // Vector for moving the actor around the screen
-        Vector2 moveVector = new Vector2();
+        // Local action slot that will be reused to move the main party around the place
+        ActionSlot moveSlot = new ActionSlot();
 
         #endregion
 
@@ -110,6 +110,20 @@ namespace ChronoForce.Engine
 
         #endregion
 
+        #region Initialization
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public WorldDirector()
+        {
+            // Loads the npcSlots with blank action slots
+            for (int i = 0; i < cMaxSlots; i++)
+                npcSlots.Add(new ActionSlot());
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -122,12 +136,45 @@ namespace ChronoForce.Engine
             if (currentSlots.Count < cMaxSlots)
             {
                 currentSlots.Add(slot);
+                Console.WriteLine("[WorldDirector INFO]: Adding " + slot.Action.ToString() + " to list.");
                 slot.Complete += SlotHandler;
             }
             else
             {
                 Console.WriteLine("[WorldDirector WARNING]: Cannot add another action slot.  Currently full.");
             }
+        }
+
+        /// <summary>
+        /// Adds a single action to the list that moves the party in a given direction using the default speed.
+        /// </summary>
+        /// <param name="actor">Actor to move on the field</param>
+        /// <param name="direction">Direction to move the party</param>
+        public void MoveNPC(CharacterBase actor, MapDirection direction)
+        {
+            npcSlots[actor.ID].Action = ActionCommand.WalkTo;
+            npcSlots[actor.ID].Actor = actor;
+            npcSlots[actor.ID].IsAbsolute = false;
+            npcSlots[actor.ID].Frames = 30;
+
+            switch (direction)
+            {
+                case MapDirection.Up:
+                    npcSlots[actor.ID].EndPosition = cMoveUp;
+                    break;
+                case MapDirection.Down:
+                    npcSlots[actor.ID].EndPosition = cMoveDown;
+                    break;
+                case MapDirection.Left:
+                    npcSlots[actor.ID].EndPosition = cMoveLeft;
+                    break;
+                case MapDirection.Right:
+                    npcSlots[actor.ID].EndPosition = cMoveRight;
+                    break;
+            }
+
+            // Mark that the npcSlot is active again
+            npcSlots[actor.ID].Reset();
         }
 
         /// <summary>
@@ -210,6 +257,10 @@ namespace ChronoForce.Engine
             // Loops through all the current actions and update them
             for (int i = 0; i < currentSlots.Count; i++)
                 currentSlots[i].Update(elapsed);
+
+            // Loops through all the npc actions and update them
+            for (int i = 0; i < npcSlots.Count; i++)
+                npcSlots[i].Update(elapsed);
 
             // Update the party movement if any
             moveSlot.Update(elapsed);
