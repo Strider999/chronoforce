@@ -60,6 +60,7 @@
     <Compile Include="Base\Debugger.cs" />
     <Compile Include="ChronosSetting.cs" />
     <Compile Include="Engine\Director.cs" />
+    <Compile Include="Engine\Map.cs" />
     <Compile Include="Engine\WorldDirector.cs" />
     <Compile Include="Fonts.cs" />
     <Compile Include="ScreenManager\GameScreen.cs" />

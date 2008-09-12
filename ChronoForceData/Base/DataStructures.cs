@@ -59,6 +59,17 @@ namespace ChronoForceData.Base
         Item = 3
     }
 
+    /// <summary>
+    /// Enumeration to show where the character is moving
+    /// </summary>
+    public enum MapDirection : int
+    {
+        Up = 0,
+        Down = 1,
+        Left = 2,
+        Right = 3
+    }
+
     #endregion
 
     #region Constants
