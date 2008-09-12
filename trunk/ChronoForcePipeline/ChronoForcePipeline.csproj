@@ -41,6 +41,7 @@
     <Compile Include="Graphics\AnimatingSpriteWriter.cs" />
     <Compile Include="ChronoForceWriter.cs" />
     <Compile Include="Graphics\AnimationWriter.cs" />
+    <Compile Include="Map\MapCodeActionWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

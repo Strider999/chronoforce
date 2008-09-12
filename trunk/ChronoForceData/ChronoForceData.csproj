@@ -40,6 +40,7 @@
     <Compile Include="Actions\ActionScript.cs" />
     <Compile Include="Actions\ActionSlot.cs" />
     <Compile Include="Actions\BattleText.cs" />
+    <Compile Include="ContentObject.cs" />
     <Compile Include="Map\MapCodeAction.cs" />
     <Compile Include="Graphics\AnimatingSprite.cs" />
     <Compile Include="Graphics\Animation.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Character\PlayerClass.cs" />
     <Compile Include="Graphics\BattleText.cs" />
     <Compile Include="Graphics\SpriteSheet.cs" />
+    <Compile Include="Map\MapEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

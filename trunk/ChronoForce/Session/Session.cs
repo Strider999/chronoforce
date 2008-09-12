@@ -22,6 +22,9 @@ using ChronoForceData.Character;
 
 namespace ChronoForce.Session
 {
+    /// <summary>
+    /// Class that stores all the information about the current play session of the game
+    /// </summary>
     class Session
     {
         #region Singleton
