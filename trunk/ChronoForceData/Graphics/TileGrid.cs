@@ -6,6 +6,7 @@
 // Copyright (C) Microsoft Corporation. All rights reserved.
 // Modified by David Hsu
 // - Added function to set the position without having to create a new Vector2
+// - Added SetGrid to copy a whole grid
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -20,7 +21,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
 #endregion
 
-namespace ChronoForce.Engine
+namespace ChronoForceData.Graphics
 {
     /// <summary>
     /// EDUCATIONAL: Class used to align tiles to a regular grid.
@@ -31,7 +32,6 @@ namespace ChronoForce.Engine
         #region Fields
         private string gridName;
         private int[][] grid;
-        private GraphicsDevice graphics;
         private SpriteSheet sheet;
         private int width;
         private int height;
@@ -53,14 +53,8 @@ namespace ChronoForce.Engine
 
         #region Initialization
         public TileGrid(int tileWidth, int tileHeight, int numXTiles, int numYTiles,
-            Vector2 offset,  SpriteSheet tileSheet,
-            GraphicsDevice graphicsComponent, string name)
+            Vector2 offset,  SpriteSheet tileSheet, string name)
         {
-            if (graphicsComponent == null)
-            {
-                throw new ArgumentNullException("graphicsComponent");
-            }
-            graphics = graphicsComponent;
             sheet = tileSheet;
             width = numXTiles;
             height = numYTiles;
@@ -85,22 +79,14 @@ namespace ChronoForce.Engine
             CameraPosition = Vector2.Zero;
             gridName = name;
 
+            displaySize = ChronosSetting.WindowSize;
+
             //graphicsComponent.DeviceReset += 
             //    new EventHandler(OnGraphicsComponentDeviceReset);
 
-            OnGraphicsComponentDeviceReset(this, new EventArgs());
+            //OnGraphicsComponentDeviceReset(this, new EventArgs());
         }
 
-        void OnGraphicsComponentDeviceReset(object sender, EventArgs e)
-        {
-            displaySize.X = 
-                graphics.PresentationParameters.BackBufferWidth;
-            
-            displaySize.Y = 
-                graphics.PresentationParameters.BackBufferHeight;
-            
-            visibilityChanged = true;
-        }
         #endregion
 
         #region Public Accessors
@@ -189,6 +175,15 @@ namespace ChronoForce.Engine
         public void SetTile(int xIndex, int yIndex, int tile)
         {
             grid[xIndex][yIndex] = tile;
+        }
+
+        /// <summary>
+        /// Copies a whole grid to the TileGrid
+        /// </summary>
+        /// <param name="newGrid">Grid with tile information for the TileGrid</param>
+        public void SetGrid(int[][] newGrid)
+        {
+            grid = newGrid;
         }
 
         /// <summary>

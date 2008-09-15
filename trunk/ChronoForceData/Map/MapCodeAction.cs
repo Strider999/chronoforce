@@ -30,6 +30,8 @@ namespace ChronoForceData.Map
     {
         #region Fields
 
+        // Map code name used to identify which code it belongs to on the map
+        string mapCodeName;
         // Map code on the map
         int code;
         // Type of code this represents
@@ -46,6 +48,15 @@ namespace ChronoForceData.Map
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Map code name used to identify which code it belongs to on the map
+        /// </summary>
+        public string MapCodeName
+        {
+            get { return mapCodeName; }
+            set { mapCodeName = value; }
+        }
 
         /// <summary>
         /// Code number on the map
@@ -107,6 +118,7 @@ namespace ChronoForceData.Map
                 }
     
                 // Read in the code and type
+                mCode.MapCodeName = input.ReadString();
                 mCode.Code = input.ReadInt32();
                 mCode.Type = (CodeType)input.ReadInt32();
 

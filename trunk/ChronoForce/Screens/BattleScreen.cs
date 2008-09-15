@@ -18,6 +18,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ChronoForce.Base;
 using ChronoForce.Engine;
+using ChronoForceData;
 using ChronoForceData.Base;
 using ChronoForceData.Character;
 using ChronoForceData.Graphics;

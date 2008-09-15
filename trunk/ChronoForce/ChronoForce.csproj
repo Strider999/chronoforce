@@ -58,16 +58,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\Debugger.cs" />
-    <Compile Include="ChronosSetting.cs" />
     <Compile Include="Engine\Director.cs" />
-    <Compile Include="Engine\Map.cs" />
     <Compile Include="Engine\WorldDirector.cs" />
     <Compile Include="Fonts.cs" />
     <Compile Include="ScreenManager\GameScreen.cs" />
     <Compile Include="Base\InputState.cs" />
     <Compile Include="Engine\BattleDirector.cs" />
     <Compile Include="Engine\BattleEngine.cs" />
-    <Compile Include="Engine\Camera2D.cs" />
     <Compile Include="Engine\ChronosEngine.cs" />
     <Compile Include="Engine\MapEngine.cs" />
     <Compile Include="Parser\ActionParser.cs" />
@@ -75,8 +72,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ChronoForce.cs" />
     <Compile Include="ScreenManager\ScreenManager.cs" />
-    <Compile Include="Engine\SpriteSheet.cs" />
-    <Compile Include="Engine\TileGrid.cs" />
     <Compile Include="Screens\BackgroundScreen.cs" />
     <Compile Include="Screens\BattleItemScreen.cs" />
     <Compile Include="Screens\BattleMenuEntry.cs" />

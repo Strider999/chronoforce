@@ -21,10 +21,9 @@ namespace ChronoForceData.Map
     /// <summary>
     /// The description of where an instance of a world object is in the world.
     /// </summary>
-    public class MapEntry<T> where T : ContentObject
+    public class MapEntry<T> : ContentEntry<T> where T : ContentObject
     {
         #region Map Data
-
 
         /// <summary>
         /// The position of this object on the map.
@@ -56,32 +55,6 @@ namespace ChronoForceData.Map
             set { direction = value; }
         }
 
-
-        #endregion
-
-        #region Content Data
-
-        /// <summary>
-        /// The content referred to by this entry.
-        /// </summary>
-        /// <remarks>
-        /// This will not be automatically loaded, as the content path may be incomplete.
-        /// </remarks>
-        private T content;
-
-        /// <summary>
-        /// The content referred to by this entry.
-        /// </summary>
-        /// <remarks>
-        /// This will not be automatically loaded, as the content path may be incomplete.
-        /// </remarks>
-        [ContentSerializerIgnore]
-        [XmlIgnore]
-        public T Content
-        {
-            get { return content; }
-            set { content = value; }
-        }
 
         #endregion
 
@@ -138,6 +111,7 @@ namespace ChronoForceData.Map
                     desc = new MapEntry<T>();
                 }
 
+                input.ReadRawObject<ContentEntry<T>>(desc as ContentEntry<T>);
                 desc.MapPosition = input.ReadObject<Point>();
                 desc.Direction = (MapDirection)input.ReadInt32();
 

@@ -21,7 +21,7 @@ using Microsoft.Xna.Framework.Storage;
 using ChronoForceData.Actions;
 #endregion
 
-namespace ChronoForce.Engine
+namespace ChronoForceData.Base
 {
     /// <summary>
     /// Used to denote which axis is being modified for camera movement

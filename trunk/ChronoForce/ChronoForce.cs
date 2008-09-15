@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ChronoForce.Screens;
 using ChronoForce.Engine;
+using ChronoForceData;
 #endregion
 
 namespace ChronoForce
