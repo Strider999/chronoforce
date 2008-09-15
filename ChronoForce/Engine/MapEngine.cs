@@ -17,9 +17,11 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.Input;
 using ChronoForce.Base;
+using ChronoForceData;
 using ChronoForceData.Character;
 using ChronoForceData.Actions;
 using ChronoForceData.Base;
+using ChronoForceData.Map;
 #endregion
 
 namespace ChronoForce.Engine
@@ -54,6 +56,11 @@ namespace ChronoForce.Engine
         const int cActorMoveTime = 2000; // Minimum time delay before moving an actor in milliseconds
         readonly Vector2 cSpriteScale = new Vector2(1f, 1f);
 
+        // Cinamtic time delay for each frame
+        const int cCinematicTime = 2;
+        // Fade amount for each frame
+        const int cFadeAmount = 40;
+
         #endregion
 
         #region Fields
@@ -65,7 +72,7 @@ namespace ChronoForce.Engine
         Camera2D camera;
 
         // Map Information
-        Map mapData;
+        MapData mapInfo;
 
         // Sprite information
         List<CharacterNPC> mapActors = new List<CharacterNPC>(cMaxActors);
@@ -88,6 +95,14 @@ namespace ChronoForce.Engine
         string statusMsg;
         // Debugger class for printing debug data
         Debugger mapDebug;
+        // Flag to show the map is transitioning between one another or during
+        // actual cinematics
+        bool inCinematic = false;
+        // Timer for cinematics
+        int cinematicTimer = 0;
+
+        // Color for doing fade controls
+        byte[] fadeColor = new byte[2];
 
         // Debugging variables to control
         bool[] showLayer;
@@ -130,9 +145,9 @@ namespace ChronoForce.Engine
         /// <summary>
         /// Returns the map data
         /// </summary>
-        private static Map MapData
+        private static MapData MapInfo
         {
-            get { return singleton.mapData; }
+            get { return singleton.mapInfo; }
         }
 
         /// <summary>
@@ -140,7 +155,7 @@ namespace ChronoForce.Engine
         /// </summary>
         private static Vector2 MapSize
         {
-            get { return singleton.mapData.MapSize; }
+            get { return singleton.mapInfo.MapSize; }
         }
 
         /// <summary>
@@ -158,6 +173,14 @@ namespace ChronoForce.Engine
         {
             get { return singleton.controlCamera; }
             set { singleton.controlCamera = value; }
+        }
+
+        /// <summary>
+        /// Returns true if the engine is running a cinematic
+        /// </summary>
+        public static bool InCinematic
+        {
+            get { return singleton.inCinematic; }
         }
 
         /// <summary>
@@ -247,6 +270,9 @@ namespace ChronoForce.Engine
             for (int i = 0; i < 3; i++)
                 showLayer[i] = true;
 
+            fadeColor[0] = 255;
+            fadeColor[1] = 0;
+
             controlCamera = false;
         }
 
@@ -280,7 +306,8 @@ namespace ChronoForce.Engine
             singleton.director = director;
 
             // Load the map file
-            singleton.mapData = new Map(graphics, content, filename);
+            //singleton.mapInfo = new MapData(graphics, content, filename);
+            singleton.mapInfo = content.Load<MapData>(@"Maps/MapTest");
 
             // Load tests
             singleton.LoadTests();
@@ -305,8 +332,8 @@ namespace ChronoForce.Engine
                 npc.Sprite.ScreenCenter = ChronosSetting.WindowSize / 2;
                 npc.MapPosition = new Point(rand.Next(1, 10), rand.Next(1, 10));
                 npc.Position = 
-                    new Vector2(npc.MapPosition.X * mapData.TileWidth - (npc.Sprite.FrameDimension.X - mapData.TileWidth),
-                                    npc.MapPosition.Y * mapData.TileHeight - (npc.Sprite.FrameDimension.Y - mapData.TileHeight));
+                    new Vector2(npc.MapPosition.X * mapInfo.TileWidth - (npc.Sprite.FrameDimension.X - mapInfo.TileWidth),
+                                    npc.MapPosition.Y * mapInfo.TileHeight - (npc.Sprite.FrameDimension.Y - mapInfo.TileHeight));
                 npc.ID = i;
                 npc.Ready += ReadyHandler;
                 npc.Timer = cActorMoveTime + rand.Next(2000);
@@ -318,8 +345,8 @@ namespace ChronoForce.Engine
             mapNPC.Add(3);
 
             // DEBUG:  Position the player correctly (probably needed, but maybe not here)
-            player.Position = new Vector2(-1 * (player.Sprite.FrameDimension.X - mapData.TileWidth),
-                -1 * (player.Sprite.FrameDimension.Y - mapData.TileHeight));
+            player.Position = new Vector2(-1 * (player.Sprite.FrameDimension.X - mapInfo.TileWidth),
+                -1 * (player.Sprite.FrameDimension.Y - mapInfo.TileHeight));
         }
 
         /// <summary>
@@ -442,7 +469,7 @@ namespace ChronoForce.Engine
         private void CameraChanged()
         {
             // Update the map views
-            mapData.UpdateCameraView(camera);
+            mapInfo.UpdateCameraView(camera);
 
             // Update player views
             player.Sprite.CameraRotation = camera.Rotation;
@@ -476,7 +503,7 @@ namespace ChronoForce.Engine
             int dy = 0;
 
             // If we're in a cinematic, ignore movement commands
-            if (MapData.InCinematic)
+            if (InCinematic)
                 return;
 
             // First, change the character to face that direction
@@ -501,7 +528,7 @@ namespace ChronoForce.Engine
             }
 
             // Next, Check to see if the character can move that direction
-            if (MapData.IsPassable(Player.MapPosition, direction, MapData.CurrentMap) &&
+            if (MapInfo.IsPassable(Player.MapPosition, direction, MapInfo.CurrentMap) &&
                 singleton.NotBlocked(Player.MapPosition, direction) )
             {
                 Player.MoveMapPosition(dx, dy);
@@ -546,10 +573,10 @@ namespace ChronoForce.Engine
 
             // Check to see if there's any NPCs in the area
             int startI = 0;
-            if (singleton.mapData.CurrentMap != 0)
-                startI = singleton.mapNPC[singleton.mapData.CurrentMap - 1];
+            if (singleton.mapInfo.CurrentMap != 0)
+                startI = singleton.mapNPC[singleton.mapInfo.CurrentMap - 1];
 
-            for (int i = startI; i < singleton.mapNPC[singleton.mapData.CurrentMap]; i++)
+            for (int i = startI; i < singleton.mapNPC[singleton.mapInfo.CurrentMap]; i++)
             {
                 if (singleton.mapActors[i].MapPosition.X == Player.MapPosition.X + dx &&
                     singleton.mapActors[i].MapPosition.Y == Player.MapPosition.Y + dy)
@@ -600,10 +627,10 @@ namespace ChronoForce.Engine
 
             // Check for NPCs
             int startI = 0;
-            if (mapData.CurrentMap != 0)
-                startI = mapNPC[mapData.CurrentMap - 1];
+            if (mapInfo.CurrentMap != 0)
+                startI = mapNPC[mapInfo.CurrentMap - 1];
 
-            for (int i = startI; i < mapNPC[mapData.CurrentMap]; i++)
+            for (int i = startI; i < mapNPC[mapInfo.CurrentMap]; i++)
             {
                 if (mapActors[i].MapPosition.X == position.X + dx &&
                     mapActors[i].MapPosition.Y == position.Y + dy)
@@ -671,7 +698,7 @@ namespace ChronoForce.Engine
                     }
 
                     // Check to see if the NPC can move that direction
-                    if (mapData.IsPassable(mapActors[id].MapPosition, direction, map) &&
+                    if (mapInfo.IsPassable(mapActors[id].MapPosition, direction, map) &&
                         NotBlocked(mapActors[id].MapPosition, direction))
                     {
                         mapActors[id].MoveMapPosition(dx, dy);
@@ -693,10 +720,13 @@ namespace ChronoForce.Engine
         private void CheckMapCode(MapDirection direction)
         {
             // Check the current position of the player
-            if (mapData.MapCode[player.MapPosition.X][player.MapPosition.Y] == 1)
+            if (mapInfo.MapCode[player.MapPosition.X][player.MapPosition.Y] == 1)
             {
                 // Start transitioning to the new map
-                mapData.ChangeMap();
+                mapInfo.LastMap = mapInfo.CurrentMap;
+                mapInfo.CurrentMap = (mapInfo.CurrentMap + 1) % 2;
+
+                inCinematic = true;
 
                 // Transition the map
                 TransitionMap(direction);
@@ -715,7 +745,7 @@ namespace ChronoForce.Engine
             // TODO:  Should pass in the code ID to search for since the code will be different
             // depending on the map.  For now, only test for one.
             int newRow, newCol;
-            mapData.GetCodePosition(out newCol, out newRow);
+            mapInfo.GetCodePosition(out newCol, out newRow);
 
             // Adjust the character position
             switch (direction)
@@ -744,7 +774,7 @@ namespace ChronoForce.Engine
             {
                 cameraBound = false;
                 followParty = false;
-                if (mapData.CurrentMap == 0)
+                if (mapInfo.CurrentMap == 0)
                     director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera, 
                         ChronosSetting.WindowSize / 2, 10, true));
                 else
@@ -779,15 +809,40 @@ namespace ChronoForce.Engine
         /// <param name="elapsed">Milliseconds since last update</param>
         private void UpdateEngine(int elapsed)
         {
-            // Update the map
-            mapData.Update(elapsed);
-
-            // DEBUG:  Reset to follow the party.  This will override debug
-            if (!mapData.InCinematic)
+            // If we're in a cinematic, don't move the NPCs here and update fade color
+            // FIX:  The cinematic should update according to what type of cinematic is
+            // going on.  For now, we only assume map transitions.
+            if (inCinematic)
             {
+                cinematicTimer += elapsed;
+
+                // When a frame of action passes, update the alpha values
+                if (cinematicTimer > cCinematicTime)
+                {
+                    cinematicTimer -= cCinematicTime;
+                    fadeColor[0] = (byte)MathHelper.Clamp(fadeColor[0] - cFadeAmount, 0, 255);
+                    fadeColor[1] = (byte)MathHelper.Clamp(fadeColor[1] + cFadeAmount, 0, 255);
+
+                    // Update the tile grids for the new colors
+                    mapInfo.SetFade(mapInfo.LastMap, fadeColor[0]);
+                    mapInfo.SetFade(mapInfo.CurrentMap, fadeColor[1]);
+
+                    // When fadeColor[0] reaches 0, the cinematic is complete
+                    if (fadeColor[0] == 0)
+                    {
+                        inCinematic = false;
+                        fadeColor[0] = 255;
+                        fadeColor[1] = 0;
+                        mapInfo.LastMap = mapInfo.CurrentMap;
+                    }
+                }
+            }
+            else
+            {
+                // DEBUG:  Reset to follow the party.  This will override debug
                 cameraBound = true;
 
-                if (mapData.CurrentMap == 0)
+                if (mapInfo.CurrentMap == 0)
                 {
                     //followParty = true;
                 }
@@ -845,17 +900,17 @@ namespace ChronoForce.Engine
                 CameraChanged();
 
             // Renders the first 2 layers of the tile map
-            mapData.Draw(spriteBatch, showLayer[0], showLayer[1], false);
+            mapInfo.Draw(spriteBatch, showLayer[0], showLayer[1], false);
 
             // NOTE:  Drawing the sprite between the middle layer and top layer.
             // This will allow the top layer to over lap for arches or other tall map
             // structures.
             // Draw the NPCs according to the map
             int startI = 0;
-            if (mapData.CurrentMap != 0)
-                startI = mapNPC[mapData.CurrentMap - 1];
+            if (mapInfo.CurrentMap != 0)
+                startI = mapNPC[mapInfo.CurrentMap - 1];
 
-            for (int i = startI; i < mapNPC[mapData.CurrentMap]; i++)
+            for (int i = startI; i < mapNPC[mapInfo.CurrentMap]; i++)
             {
                 mapActors[i].Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
             }
@@ -864,7 +919,7 @@ namespace ChronoForce.Engine
             player.Draw(spriteBatch, Color.White, SpriteBlendMode.AlphaBlend);
 
             // Draw the top layer
-            mapData.Draw(spriteBatch, false, false, showLayer[2]);
+            mapInfo.Draw(spriteBatch, false, false, showLayer[2]);
 
             // TODO:  Load atmosphere layer that moves at a different speed than
             // the other layers

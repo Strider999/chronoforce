@@ -1,8 +1,9 @@
 #region File Description
 //-----------------------------------------------------------------------------
-// MapCodeActionWriter.cs
+// ContentEntryWriter.cs
 //
-// Created by David Hsu
+// Microsoft XNA Community Game Platform
+// Copyright (C) Microsoft Corporation. All rights reserved.
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -15,7 +16,7 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
-using ChronoForceData.Map;
+using ChronoForceData;
 #endregion
 
 namespace ChronoForcePipeline
@@ -27,15 +28,13 @@ namespace ChronoForcePipeline
     /// This should be part of a Content Pipeline Extension Library project.
     /// </summary>
     [ContentTypeWriter]
-    public class MapCodeActionWriter : ChronoForceWriter<MapCodeAction>
+    public class ContentEntryWriter<T> : ChronoForceWriter<ContentEntry<T>>
+        where T : ContentObject
     {
-        protected override void Write(ContentWriter output, MapCodeAction value)
+        protected override void Write(ContentWriter output, ContentEntry<T> value)
         {
-            output.Write(value.MapCodeName);
-            output.Write(value.Code);
-            output.Write((int)value.Type);
-            output.Write(value.DestinationMap);
-            output.WriteObject<Point>(value.DestinationMapPosition);
+            output.Write(value.ContentName == null ? String.Empty : value.ContentName);
+            output.Write(value.Count);
         }
     }
 }

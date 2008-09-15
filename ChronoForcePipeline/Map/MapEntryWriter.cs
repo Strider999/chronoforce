@@ -1,8 +1,9 @@
 #region File Description
 //-----------------------------------------------------------------------------
-// MapCodeActionWriter.cs
+// MapEntryWriter.cs
 //
-// Created by David Hsu
+// Microsoft XNA Community Game Platform
+// Copyright (C) Microsoft Corporation. All rights reserved.
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -15,6 +16,7 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
+using ChronoForceData;
 using ChronoForceData.Map;
 #endregion
 
@@ -27,15 +29,25 @@ namespace ChronoForcePipeline
     /// This should be part of a Content Pipeline Extension Library project.
     /// </summary>
     [ContentTypeWriter]
-    public class MapCodeActionWriter : ChronoForceWriter<MapCodeAction>
+    public class MapEntryWriter<T> : ChronoForceWriter<MapEntry<T>>
+        where T : ContentObject
     {
-        protected override void Write(ContentWriter output, MapCodeAction value)
+        ContentEntryWriter<T> contentEntryWriter = null;
+
+        protected override void Initialize(ContentCompiler compiler)
         {
-            output.Write(value.MapCodeName);
-            output.Write(value.Code);
-            output.Write((int)value.Type);
-            output.Write(value.DestinationMap);
-            output.WriteObject<Point>(value.DestinationMapPosition);
+            contentEntryWriter = compiler.GetTypeWriter(typeof(ContentEntry<T>))
+                as ContentEntryWriter<T>;
+
+            base.Initialize(compiler);
+        }
+
+        protected override void Write(ContentWriter output, MapEntry<T> value)
+        {
+            output.WriteRawObject<ContentEntry<T>>(value as ContentEntry<T>,
+                contentEntryWriter);
+            output.WriteObject(value.MapPosition);
+            output.Write((Int32)value.Direction);
         }
     }
 }

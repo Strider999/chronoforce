@@ -11,6 +11,7 @@
 #region Using Statements
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using ChronoForceData;
 #endregion
 
 namespace ChronoForce.Base

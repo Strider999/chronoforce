@@ -30,6 +30,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=2.0.0.0, Culture=neutral, PublicKeyToken=6d5c3888ef60e27d, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=2.0.0.0, Culture=neutral, PublicKeyToken=6d5c3888ef60e27d, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Game, Version=2.0.0.0, Culture=neutral, PublicKeyToken=6d5c3888ef60e27d, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -38,10 +39,14 @@
     <Compile Include="Actions\ActionScriptWriter.cs" />
     <Compile Include="Character\CharacterBaseWriter.cs" />
     <Compile Include="Character\CharacterNPCWriter.cs" />
+    <Compile Include="ContentEntryWriter.cs" />
     <Compile Include="Graphics\AnimatingSpriteWriter.cs" />
     <Compile Include="ChronoForceWriter.cs" />
     <Compile Include="Graphics\AnimationWriter.cs" />
+    <Compile Include="Map\MapDataProcessor.cs" />
+    <Compile Include="Map\MapDataWriter.cs" />
     <Compile Include="Map\MapCodeActionWriter.cs" />
+    <Compile Include="Map\MapEntryWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

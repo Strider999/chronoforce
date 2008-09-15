@@ -6,29 +6,30 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 #endregion
 
-namespace ChronoForceData.Base
+namespace ChronoForceData
 {
     /// <summary>
     /// Keeps track of custom settings, from keyboard/button layouts to save files to
     /// screen resolutions.  Only one of these will exist and provide data for all classes.
     /// </summary>
-    class ChronosSetting
+    public static class ChronosSetting
     {
         #region Fields
         // Size of the display window
-        int windowWidth;
-        int windowHeight;
+        static int windowWidth;
+        static int windowHeight;
+        static Vector2 windowSize;
 
         // Input key configurations
-        Keys upKey;
-        Keys downKey;
-        Keys leftKey;
-        Keys rightKey;
-        Keys confirmKey;
-        Keys cancelKey;
-        Keys menuKey;
-        Keys startKey;
-        Keys selectKey;
+        static Keys upKey;
+        static Keys downKey;
+        static Keys leftKey;
+        static Keys rightKey;
+        static Keys confirmKey;
+        static Keys cancelKey;
+        static Keys menuKey;
+        static Keys startKey;
+        static Keys selectKey;
         
         #endregion
 
@@ -37,7 +38,7 @@ namespace ChronoForceData.Base
         /// <summary>
         /// Returns the key for up.
         /// </summary>
-        public Keys UpKey
+        public static Keys UpKey
         {
             get { return upKey; }
             set { upKey = value; }
@@ -46,7 +47,7 @@ namespace ChronoForceData.Base
         /// <summary>
         /// Returns the key for down.
         /// </summary>
-        public Keys DownKey
+        public static Keys DownKey
         {
             get { return downKey; }
             set { downKey = value; }
@@ -55,7 +56,7 @@ namespace ChronoForceData.Base
         /// <summary>
         /// Returns the key for left.
         /// </summary>
-        public Keys LeftKey
+        public static Keys LeftKey
         {
             get { return leftKey; }
             set { leftKey = value; }
@@ -64,7 +65,7 @@ namespace ChronoForceData.Base
         /// <summary>
         /// Returns the key for right.
         /// </summary>
-        public Keys RightKey
+        public static Keys RightKey
         {
             get { return rightKey; }
             set { rightKey = value; }
@@ -74,7 +75,7 @@ namespace ChronoForceData.Base
         /// Returns the key for select, used for confirming and action,
         /// selecting a menu item, and continuing a conversation.
         /// </summary>
-        public Keys ConfirmKey
+        public static Keys ConfirmKey
         {
             get { return confirmKey; }
             set { confirmKey = value; }
@@ -84,7 +85,7 @@ namespace ChronoForceData.Base
         /// Returns the key for cancel, used for cancelling a command,
         /// going back a menu, or defaulting to "no" for choices
         /// </summary>
-        public Keys CancelKey
+        public static Keys CancelKey
         {
             get { return cancelKey; }
             set { cancelKey = value; }
@@ -93,7 +94,7 @@ namespace ChronoForceData.Base
         /// <summary>
         /// Returns the key for the menu, used mainly to access the menu.
         /// </summary>
-        public Keys MenuKey
+        public static Keys MenuKey
         {
             get { return menuKey; }
             set { menuKey = value; }
@@ -102,7 +103,7 @@ namespace ChronoForceData.Base
         /// <summary>
         /// Returns the key for start, used for pausing the game.
         /// </summary>
-        public Keys StartKey
+        public static Keys StartKey
         {
             get { return startKey; }
             set { startKey = value; }
@@ -112,7 +113,7 @@ namespace ChronoForceData.Base
         /// Returns the key for select, used for confirming and action,
         /// selecting a menu item, and continuing a conversation.
         /// </summary>
-        public Keys SelectKey
+        public static Keys SelectKey
         {
             get { return selectKey; }
             set { selectKey = value; }
@@ -121,19 +122,33 @@ namespace ChronoForceData.Base
         /// <summary>
         /// Returns the window width for the resolution
         /// </summary>
-        public int WindowWidth
+        public static int WindowWidth
         {
             get { return windowWidth; }
-            set { windowWidth = value; }
+            set { 
+                windowWidth = value;
+                windowSize.X = value;
+            }
         }
 
         /// <summary>
         /// Returns the window height for the resolution
         /// </summary>
-        public int WindowHeight
+        public static int WindowHeight
         {
             get { return windowHeight; }
-            set { windowHeight = value; }
+            set { 
+                windowHeight = value;
+                windowSize.Y = value;
+            }
+        }
+
+        /// <summary>
+        /// Returns the vector form of window size
+        /// </summary>
+        public static Vector2 WindowSize
+        {
+            get { return windowSize; }
         }
 
         #endregion
@@ -141,9 +156,9 @@ namespace ChronoForceData.Base
         #region Initialization
 
         /// <summary>
-        /// Constructor to load default values
+        /// Function to load default values
         /// </summary>
-        public ChronosSetting()
+        public static void LoadSetting()
         {
             // Default values for the settings
             // These are XBox friendly
@@ -153,6 +168,7 @@ namespace ChronoForceData.Base
             // Default values for desktop PC settings
             windowWidth = 800;
             windowHeight = 600;
+            windowSize = new Vector2(windowWidth, windowHeight);
 
             // Default values for the keys
             upKey = Keys.Up;
@@ -167,10 +183,10 @@ namespace ChronoForceData.Base
         }
 
         /// <summary>
-        /// Constructor with setting file to load from
+        /// Overloaded function with setting file to load from
         /// </summary>
         /// <param name="filename">Setting file</param>
-        ChronosSetting(string filename)
+        public static void LoadSetting(string filename)
         {
             // If the file doesn't exist, load the defaults
             // NOTE:  Maybe create the file?
