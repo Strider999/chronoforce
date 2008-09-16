@@ -41,13 +41,18 @@ namespace ChronoForceData.Map
         // List of strings for displaying dialog text
         List<string> dialog;
 
+        // Level of the map (0 is the base, 1 is a building, 2 is a room inside a building, etc.
+        int mapLevel;
         // Exit location where the portal takes the player
         int destinationMap;
+        int destinationMapLevel;
         Point destinationMapPosition;
 
         #endregion
 
         #region Properties
+
+        #region Basic Properites
 
         /// <summary>
         /// Map code name used to identify which code it belongs to on the map
@@ -76,6 +81,20 @@ namespace ChronoForceData.Map
             set { type = value; }
         }
 
+        #endregion
+
+        #region Map Properties
+
+        /// <summary>
+        /// Level of the map layer
+        /// </summary>
+        [ContentSerializer(Optional = true)]
+        public int MapLevel
+        {
+            get { return mapLevel; }
+            set { mapLevel = value; }
+        }
+
         /// <summary>
         /// Which map the portal takes the player when stepped on
         /// </summary>
@@ -87,6 +106,16 @@ namespace ChronoForceData.Map
         }
 
         /// <summary>
+        /// Destination level of the map layer
+        /// </summary>
+        [ContentSerializer(Optional = true)]
+        public int DestinationMapLevel
+        {
+            get { return destinationMapLevel; }
+            set { destinationMapLevel = value; }
+        }
+
+        /// <summary>
         /// Where on the new map the portal will take the player to
         /// </summary>
         [ContentSerializer(Optional = true)]
@@ -95,6 +124,8 @@ namespace ChronoForceData.Map
             get { return destinationMapPosition; }
             set { destinationMapPosition = value; }
         }
+
+        #endregion
 
         #endregion
 
@@ -123,7 +154,9 @@ namespace ChronoForceData.Map
                 mCode.Type = (CodeType)input.ReadInt32();
 
                 // Read the in portal data for now
+                mCode.MapLevel = input.ReadInt32();
                 mCode.DestinationMap = input.ReadInt32();
+                mCode.DestinationMapLevel = input.ReadInt32();
                 mCode.DestinationMapPosition = input.ReadObject<Point>();
 
                 return mCode;

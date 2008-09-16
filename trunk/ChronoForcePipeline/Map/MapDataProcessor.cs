@@ -87,26 +87,23 @@ namespace ChronoForcePipeline.Map
 
                 // Initialize the map matrices
                 ret.MapBounds.Add(new int[ret.MapWidth[i]][]);
-                ret.MapCodeList.Add(new int[ret.MapWidth[i]][]);
                 ret.BottomGrid.Add(new int[ret.MapWidth[i]][]);
                 ret.MiddleGrid.Add(new int[ret.MapWidth[i]][]);
                 ret.TopGrid.Add(new int[ret.MapWidth[i]][]);
                 for (int j = 0; j < ret.MapWidth[i]; j++)
                 {
                     ret.MapBounds[i][j] = new int[ret.MapHeight[i]];
-                    ret.MapCodeList[i][j] = new int[ret.MapHeight[i]];
                     ret.BottomGrid[i][j] = new int[ret.MapHeight[i]];
                     ret.MiddleGrid[i][j] = new int[ret.MapHeight[i]];
                     ret.TopGrid[i][j] = new int[ret.MapHeight[i]];
                     for (int k = 0; k < ret.MapHeight[i]; k++)
                     {
                         ret.MapBounds[i][j][k] = 0;
-                        ret.MapCodeList[i][j][k] = 0;
                     }
                 }
 
                 // Loop through each of the tiles on the map
-                int x, y;
+                int x, y, code;
                 for (int j = 0; j < ret.MapWidth[i] * ret.MapHeight[i]; j++)
                 {
                     // First two are 8-bit (x,y) coordinates
@@ -117,14 +114,14 @@ namespace ChronoForcePipeline.Map
                     ret.MapBounds[i][x][y] = bReader.ReadByte();
 
                     // Map codes contain events or special objects on the map
-                    ret.MapCodeList[i][x][y] = bReader.ReadByte();
+                    code = bReader.ReadByte();
 
                     // If we find a map code, add the location to the code entries
-                    if (ret.MapCodeList[i][x][y] > 0)
+                    if (code > 0)
                     {
                         MapEntry<MapCodeAction> newAction = new MapEntry<MapCodeAction>();
                         newAction.MapPosition = new Point(x, y);
-                        newAction.ContentName = ret.MapName[i] + ret.MapCodeList[i][x][y].ToString();
+                        newAction.ContentName = ret.MapName[i] + code.ToString();
                         ret.CodeEntries.Add(newAction);
                     }
 

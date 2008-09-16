@@ -35,8 +35,8 @@ namespace ChronoForce.Engine
         /// </summary>
         const int cMaxSlots = 10;
 
-        const int cXAmount = 39;
-        const int cYAmount = 39;
+        const int cXAmount = 40;
+        const int cYAmount = 40;
 
         // Constant vectors of movement directions
         readonly Vector2 cMoveUp = new Vector2(0, -cYAmount);
@@ -68,6 +68,20 @@ namespace ChronoForce.Engine
         #region Event Handlers
 
         /// <summary>
+        /// Signals when it finished an action slot.
+        /// </summary>
+        public EventHandler<EventArgs> SlotDone;
+
+        /// <summary>
+        /// Internal function for signalling the event
+        /// </summary>
+        protected internal void OnSlotDone()
+        {
+            if (SlotDone != null)
+                SlotDone(this, EventArgs.Empty);
+        }
+
+        /// <summary>
         /// Handles removing the action slots from the list when it's done
         /// </summary>
         /// <param name="o"></param>
@@ -80,6 +94,7 @@ namespace ChronoForce.Engine
                 if (currentSlots[i].IsFinished)
                 {
                     currentSlots.RemoveAt(i);
+                    OnSlotDone();
                     break;
                 }
             }

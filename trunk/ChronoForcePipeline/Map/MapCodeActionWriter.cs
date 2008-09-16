@@ -31,10 +31,15 @@ namespace ChronoForcePipeline
     {
         protected override void Write(ContentWriter output, MapCodeAction value)
         {
+            // Basic information
             output.Write(value.MapCodeName);
             output.Write(value.Code);
             output.Write((int)value.Type);
+
+            // Map specific information
+            output.Write(value.MapLevel);
             output.Write(value.DestinationMap);
+            output.Write(value.DestinationMapLevel);
             output.WriteObject<Point>(value.DestinationMapPosition);
         }
     }
