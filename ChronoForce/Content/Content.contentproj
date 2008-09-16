@@ -173,13 +173,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestMapCode.xml">
-      <Name>TestMapCode</Name>
-      <Importer>XmlImporter</Importer>
-      <Processor>PassThroughProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Maps\MapTest.xml">
       <Name>MapTest</Name>
       <Importer>XmlImporter</Importer>

@@ -242,6 +242,22 @@ namespace ChronoForce.Engine
             MoveNPC(e.ID);
         }
 
+        /// <summary>
+        /// Handles reseting following the party and camera bounds after a
+        /// map transition.
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="e"></param>
+        void CameraDoneHandler(object o, EventArgs e)
+        {
+            // If this is the base map, turn on map bounds
+            if (mapInfo.CurrentMapLevel == 0)
+                cameraBound = true;
+
+            // In either case, turn back on party following
+            followParty = true;
+        }
+
         #endregion
 
         #region Initialization
@@ -341,8 +357,8 @@ namespace ChronoForce.Engine
             }
 
             // DEBUG:  Adds the NPCs to the map
-            mapNPC.Add(3);
-            mapNPC.Add(3);
+            for (int i = 0; i < mapInfo.BottomGrid.Count; i++)
+                mapNPC.Add(3);
 
             // DEBUG:  Position the player correctly (probably needed, but maybe not here)
             player.Position = new Vector2(-1 * (player.Sprite.FrameDimension.X - mapInfo.TileWidth),
@@ -535,7 +551,7 @@ namespace ChronoForce.Engine
                 Director.MoveParty(Player, direction);
 
                 // Check any map codes in the area
-                singleton.CheckMapCode(direction);
+                singleton.CheckMapCode(dx, dy);
             }
         }
 
@@ -672,26 +688,26 @@ namespace ChronoForce.Engine
                 moved = false;
 
                 // Keep trying until the character can move to an empty spot
-                while (moved == false)
+                //while (moved == false)
                 {
                     dx = dy = 0;
                     direction = (MapDirection)rand.Next(4);
 
                     switch (direction)
                     {
-                        case MapDirection.Up: // Up
+                        case MapDirection.Up:
                             mapActors[id].Sprite.Direction = "Back";
                             dy = -1;
                             break;
-                        case MapDirection.Down: // Down
+                        case MapDirection.Down:
                             mapActors[id].Sprite.Direction = "Front";
                             dy = 1;
                             break;
-                        case MapDirection.Left: // Left
+                        case MapDirection.Left:
                             mapActors[id].Sprite.Direction = "Left";
                             dx = -1;
                             break;
-                        case MapDirection.Right: // Right
+                        case MapDirection.Right:
                             mapActors[id].Sprite.Direction = "Right";
                             dx = 1;
                             break;
@@ -717,19 +733,28 @@ namespace ChronoForce.Engine
         /// </summary>
         /// <remarks>This will check for more codes later on, including
         /// in-game cinematics, quest objects, and event triggered items from a file.</remarks>
-        private void CheckMapCode(MapDirection direction)
+        private void CheckMapCode(int dx, int dy)
         {
-            // Check the current position of the player
-            if (mapInfo.MapCode[player.MapPosition.X][player.MapPosition.Y] == 1)
+            // Find the map code action from the list if it exists
+            MapEntry<MapCodeAction> entry = mapInfo.CodeEntries.Find(
+                delegate(MapEntry<MapCodeAction> testEntry)
+                {
+                    return
+                        (testEntry.ContentName.Contains(mapInfo.MapName[mapInfo.CurrentMap])) &&
+                        (testEntry.MapPosition == player.MapPosition);
+                });
+
+            if (entry != null)
             {
                 // Start transitioning to the new map
                 mapInfo.LastMap = mapInfo.CurrentMap;
-                mapInfo.CurrentMap = (mapInfo.CurrentMap + 1) % 2;
+                mapInfo.CurrentMap = entry.Content.DestinationMap;
+                mapInfo.CurrentMapLevel = entry.Content.DestinationMapLevel;
 
                 inCinematic = true;
 
                 // Transition the map
-                TransitionMap(direction);
+                TransitionMap(entry.Content.DestinationMapPosition, dx, dy);
             }
         }
 
@@ -737,54 +762,50 @@ namespace ChronoForce.Engine
         /// Transitions between maps, specifically for indoor/outdoor situations
         /// and floors of a building
         /// </summary>
-        /// <param name="direction">Direction the character moved into the area</param>
-        private void TransitionMap(MapDirection direction)
+        /// <param name="position">Exit position</param>
+        private void TransitionMap(Point position, int dx, int dy)
         {
-            // First, find the entrace to the new map so we can position the character and
-            // map correctly with respect to the camera view
-            // TODO:  Should pass in the code ID to search for since the code will be different
-            // depending on the map.  For now, only test for one.
-            int newRow, newCol;
-            mapInfo.GetCodePosition(out newCol, out newRow);
+            Vector2 newPosition = new Vector2();
 
-            // Adjust the character position
-            switch (direction)
-            {
-                case MapDirection.Down:
-                    player.SetMapPosition(newCol, newRow + 1);
-                    break;
-                case MapDirection.Up:
-                    player.SetMapPosition(newCol, newRow - 1);
-                    break;
-                case MapDirection.Left:
-                    player.SetMapPosition(newCol - 1, newRow);
-                    break;
-                case MapDirection.Right:
-                    player.SetMapPosition(newCol + 1, newRow);
-                    break;
-            }
+            // Use the direction to get the proper offset
+
+            // Change the map position to the new map position based on the exit position
+            player.MapPosition = position;
 
             // If the player position isn't the same as the camera, then we're at an edge case
             // Move the camera to where the player is, update the position, and then update
             // the maps so everything remains centered.
-            // TODO:  This should call a script that automatically sets these parameters and move the 
-            // camera correctly.  For now, instantly go to the position
-            // HACK:  Hard coding how to move the camera depending on which map we're switching ot
-            if (player.Position != camera.Position)
+            cameraBound = false;
+
+            if (MapInfo.CurrentMapLevel == 0)
             {
-                cameraBound = false;
-                followParty = false;
-                if (mapInfo.CurrentMap == 0)
-                    director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera, 
-                        ChronosSetting.WindowSize / 2, 10, true));
-                else
-                    director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera, 
-                        player.Position, 10, true));
+                // Check the bounds of the map so the camera will move correctly
+                newPosition.X = MathHelper.Clamp(player.Position.X,
+                    ChronosSetting.WindowWidth / 2,
+                    mapInfo.MapSize.X - (ChronosSetting.WindowWidth / 2));
+                newPosition.Y = MathHelper.Clamp(player.Position.Y,
+                    ChronosSetting.WindowHeight / 2,
+                    mapInfo.MapSize.Y - (ChronosSetting.WindowHeight / 2));
+
+                director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera, 
+                    newPosition, 10, true));
             }
             else
             {
-                cameraBound = true;
+                // Follow the party to the exit position
+                // FIX:  Need a way to tell it to go 40 px or whatever the character movement
+                // will be.  Place this inside the constants data?
+                newPosition.X = player.Position.X + (dx * 40);
+                newPosition.Y = player.Position.Y + (dy * 40);
+                director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera, 
+                    newPosition, 10, true));
             }
+
+            // Disable following the party
+            followParty = false;
+
+            // When the camera is finished moving, handle the signal
+            director.SlotDone += CameraDoneHandler;
         }
 
         #endregion
@@ -835,20 +856,6 @@ namespace ChronoForce.Engine
                         fadeColor[1] = 0;
                         mapInfo.LastMap = mapInfo.CurrentMap;
                     }
-                }
-            }
-            else
-            {
-                // DEBUG:  Reset to follow the party.  This will override debug
-                cameraBound = true;
-
-                if (mapInfo.CurrentMap == 0)
-                {
-                    //followParty = true;
-                }
-                else
-                {
-                    followParty = false;
                 }
             }
 

@@ -65,6 +65,9 @@ namespace ChronoForceData.Map
         int lastMap = 0;
         int currentMap = 0;
 
+        // Current map level
+        int currentMapLevel = 0;
+
         // Stored map information
         string mapTileFile;
         int tileWidth, tileHeight;
@@ -74,7 +77,6 @@ namespace ChronoForceData.Map
         List<int> mapHeight = new List<int>(); // Size in tiles
         List<Vector2> mapSize = new List<Vector2>(); // Size in pixels
         List<int[][]> mapBounds = new List<int[][]>();
-        List<int[][]> mapCodes = new List<int[][]>();
 
         // Filename for the map code data
         string mapCodeFilename;
@@ -132,15 +134,6 @@ namespace ChronoForceData.Map
         {
             get { return topGrid; }
             set { topGrid = value; }
-        }
-
-        /// <summary>
-        /// List of the map code matrix, used mostly for reading from the pipeline
-        /// </summary>
-        public List<int[][]> MapCodeList
-        {
-            get { return mapCodes; }
-            set { mapCodes = value; }
         }
 
         /// <summary>
@@ -231,7 +224,7 @@ namespace ChronoForceData.Map
         }
 
         /// <summary>
-        /// Returns the current map
+        /// The current map
         /// </summary>
         [ContentSerializerIgnore]
         public int CurrentMap
@@ -241,7 +234,7 @@ namespace ChronoForceData.Map
         }
 
         /// <summary>
-        /// Returns the previous map
+        /// The previous map before the transition
         /// </summary>
         [ContentSerializerIgnore]
         public int LastMap
@@ -251,21 +244,22 @@ namespace ChronoForceData.Map
         }
 
         /// <summary>
+        /// The current map level (0: base, 1: building, 2: inside building, etc.)
+        /// </summary>
+        [ContentSerializerIgnore]
+        public int CurrentMapLevel
+        {
+            get { return currentMapLevel; }
+            set { currentMapLevel = value; }
+        }
+
+        /// <summary>
         /// Returns the current size of the map in pixels
         /// </summary>
         [ContentSerializerIgnore]
         public Vector2 MapSize
         {
             get { return mapSize[currentMap]; }
-        }
-
-        /// <summary>
-        /// Returns the matrix of map codes
-        /// </summary>
-        [ContentSerializerIgnore]
-        public int[][] MapCode
-        {
-            get { return mapCodes[currentMap]; }
         }
 
         #endregion
@@ -332,12 +326,28 @@ namespace ChronoForceData.Map
             
             // First, find the entrace to the new map so we can position the character and
             // map correctly.
-            bottomLayer[1].SetPosition((codeEntries[0].MapPosition.X - codeEntries[1].MapPosition.X) * tileWidth,
-                (codeEntries[0].MapPosition.Y - codeEntries[1].MapPosition.Y + 1) * tileHeight);
-            middleLayer[1].SetPosition((codeEntries[0].MapPosition.X - codeEntries[1].MapPosition.X) * tileWidth,
-                (codeEntries[0].MapPosition.Y - codeEntries[1].MapPosition.Y + 1) * tileHeight);
-            topLayer[1].SetPosition((codeEntries[0].MapPosition.X - codeEntries[1].MapPosition.X) * tileWidth,
-                (codeEntries[0].MapPosition.Y - codeEntries[1].MapPosition.Y + 1) * tileHeight);
+            // By default, the base map is always at (0,0) and any other base maps
+            int xPos, yPos;
+            int destMap;
+            for (int i = 0; i < codeEntries.Count; i++)
+            {
+                destMap = codeEntries[i].Content.DestinationMap;
+
+                // If the destination is lower in ID than the current or 0, don't do anything since
+                // the previous would have set the position already
+                if (destMap > 0 && codeEntries[i].Content.MapLevel < codeEntries[i].Content.DestinationMapLevel)
+                {
+                    // Calculate the position of the map to render
+                    xPos = (int)
+                        (codeEntries[i].MapPosition.X - codeEntries[i].Content.DestinationMapPosition.X) * tileWidth;
+                    yPos = (int)
+                        (codeEntries[i].MapPosition.Y - codeEntries[i].Content.DestinationMapPosition.Y) * tileHeight;
+
+                    bottomLayer[destMap].SetPosition(xPos, yPos);
+                    middleLayer[destMap].SetPosition(xPos, yPos);
+                    topLayer[destMap].SetPosition(xPos, yPos);
+                }
+            }
         }
 
         #endregion
@@ -422,31 +432,6 @@ namespace ChronoForceData.Map
                 // Position
                 topLayer[lastMap].CameraPosition = middleLayer[lastMap].CameraPosition =
                     bottomLayer[lastMap].CameraPosition = camera.Position;
-            }
-        }
-
-        /// <summary>
-        /// Returns the col and row of the map code
-        /// </summary>
-        /// <param name="col"></param>
-        /// <param name="row"></param>
-        public void GetCodePosition(out int col, out int row)
-        {
-            col = row = -1;
-            for (int i = 0; i < mapWidth[currentMap]; i++)
-            {
-                for (int j = 0; j < mapHeight[currentMap]; j++)
-                {
-                    if (mapCodes[currentMap][i][j] == 1)
-                    {
-                        col = i;
-                        row = j;
-                        break;
-                    }
-                }
-
-                if (row != -1 && col != -1)
-                    break;
             }
         }
 
@@ -536,9 +521,8 @@ namespace ChronoForceData.Map
                 mData.middleGrid = input.ReadObject<List<int[][]>>();
                 mData.topGrid = input.ReadObject<List<int[][]>>();
 
-                // Bounds and MapCodes
+                // Bounds
                 mData.MapBounds = input.ReadObject<List<int[][]>>();
-                mData.MapCodeList = input.ReadObject<List<int[][]>>();
 
                 // Filename of the map codes
                 mData.MapCodeFilename = input.ReadString();

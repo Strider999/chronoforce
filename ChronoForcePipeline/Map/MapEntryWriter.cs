@@ -46,7 +46,7 @@ namespace ChronoForcePipeline
         {
             output.WriteRawObject<ContentEntry<T>>(value as ContentEntry<T>,
                 contentEntryWriter);
-            output.WriteObject(value.MapPosition);
+            output.WriteObject<Point>(value.MapPosition);
             output.Write((Int32)value.Direction);
         }
     }

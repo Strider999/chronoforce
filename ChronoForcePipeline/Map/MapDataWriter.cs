@@ -53,9 +53,8 @@ namespace ChronoForcePipeline
             output.WriteObject<List<int[][]>>(value.MiddleGrid);
             output.WriteObject<List<int[][]>>(value.TopGrid);
 
-            // Bounds and MapCodes
+            // Bounds
             output.WriteObject<List<int[][]>>(value.MapBounds);
-            output.WriteObject<List<int[][]>>(value.MapCodeList);
 
             // Filename of the map code information
             output.Write(value.MapCodeFilename);

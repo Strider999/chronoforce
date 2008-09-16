@@ -70,7 +70,7 @@ namespace ChronoForce.Parser
                 smallStringSize = font.MeasureString(smallString);
                 splitStringSize = font.MeasureString(splitString[i]);
 
-                // Check to see if we exceeded the maxCharacter limit if we add a word
+                // Check to see if we exceeded the maxWidth pixel limit if we add a word
                 if (splitStringSize.X + smallStringSize.X > maxWidth)
                 {
                     // If we reached the max rows, time to add the string to the list and
