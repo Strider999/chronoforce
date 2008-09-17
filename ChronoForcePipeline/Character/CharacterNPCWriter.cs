@@ -32,24 +32,27 @@ namespace ChronoForcePipeline
     [ContentTypeWriter]
     public class CharacterNPCWriter : ChronoForceWriter<CharacterNPC>
     {
+        CharacterBaseWriter charBaseWriter = null;
+
+        protected override void Initialize(ContentCompiler compiler)
+        {
+            charBaseWriter = compiler.GetTypeWriter(typeof(CharacterBase))
+                as CharacterBaseWriter;
+
+            base.Initialize(compiler);
+        }
+
         protected override void Write(ContentWriter output, CharacterNPC value)
         {
-            // Write the name of the character
-            output.Write(value.Name);
-
-            // Write the object type
-            output.Write((int)value.ObjectType);
-
-            // Write the object position
-            output.Write(value.Position);
-            output.WriteObject<Point>(value.MapPosition);
-
-            output.WriteObject<AnimatingSprite>(value.Sprite);
+            // Write the basic character object
+            output.WriteRawObject<CharacterBase>(value as CharacterBase, charBaseWriter);
 
             // Write the NPC specific information
             output.Write(value.Moves);
             output.Write(value.MaxRadius);
             output.WriteObject<List<string>>(value.DialogText);
+            output.WriteObject<List<Point>>(value.RestrictedPositions);
+            output.Write(value.IsMerchant);
         }
     }
 }

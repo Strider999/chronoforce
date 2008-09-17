@@ -19,6 +19,7 @@ namespace ChronoForceData
         static int windowWidth;
         static int windowHeight;
         static Vector2 windowSize;
+        static Rectangle windowFullSize;
 
         // Input key configurations
         static Keys upKey;
@@ -151,6 +152,14 @@ namespace ChronoForceData
             get { return windowSize; }
         }
 
+        /// <summary>
+        /// Returns a rectangle that covers the full screen (or window)
+        /// </summary>
+        public static Rectangle WindowFullSize
+        {
+            get { return windowFullSize; }
+        }
+
         #endregion
 
         #region Initialization
@@ -169,6 +178,7 @@ namespace ChronoForceData
             windowWidth = 800;
             windowHeight = 600;
             windowSize = new Vector2(windowWidth, windowHeight);
+            windowFullSize = new Rectangle(0, 0, windowWidth, windowHeight);
 
             // Default values for the keys
             upKey = Keys.Up;
