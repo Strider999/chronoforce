@@ -59,7 +59,7 @@ namespace ChronoForce.Engine
         // Cinamtic time delay for each frame
         const int cCinematicTime = 2;
         // Fade amount for each frame
-        const int cFadeAmount = 40;
+        const int cFadeAmount = 4;
 
         #endregion
 
@@ -70,6 +70,9 @@ namespace ChronoForce.Engine
         SpriteBatch spriteBatch;
         ContentManager contents;
         Camera2D camera;
+
+        // Blank texture used for transitioning
+        Texture2D blankTexture;
 
         // Map Information
         MapData mapInfo;
@@ -100,7 +103,11 @@ namespace ChronoForce.Engine
         bool inCinematic = false;
         // Timer for cinematics
         int cinematicTimer = 0;
-
+        // Type of cinematic that's occuring
+        CodeType cinematicType;
+        // Flag for map transitions
+        bool inTransition = false;
+        
         // Color for doing fade controls
         byte[] fadeColor = new byte[2];
 
@@ -184,6 +191,14 @@ namespace ChronoForce.Engine
         }
 
         /// <summary>
+        /// Returns true if the engine in transitioning to another map
+        /// </summary>
+        public static bool InTransition
+        {
+            get { return singleton.inTransition; }
+        }
+
+        /// <summary>
         /// Returns the map debugger
         /// </summary>
         private static Debugger MapDebug
@@ -256,6 +271,7 @@ namespace ChronoForce.Engine
 
             // In either case, turn back on party following
             followParty = true;
+            inTransition = false;
         }
 
         #endregion
@@ -278,17 +294,23 @@ namespace ChronoForce.Engine
             contents = contentManager;
             spriteBatch = new SpriteBatch(graphics);
 
+            // Load the blank texture
+            blankTexture = contents.Load<Texture2D>("blank");
+
             // Initialize debug controls and variables
             debugOn = true;
             mapDebug = new Debugger("MapDebug", debugOn);
             showLayer = new bool[3];
 
+            // Set to show all layers
             for (int i = 0; i < 3; i++)
                 showLayer[i] = true;
 
+            // Initialize the cinematic fades
             fadeColor[0] = 255;
             fadeColor[1] = 0;
 
+            // DEBUG:  Used to control the camera manually
             controlCamera = false;
         }
 
@@ -519,7 +541,7 @@ namespace ChronoForce.Engine
             int dy = 0;
 
             // If we're in a cinematic, ignore movement commands
-            if (InCinematic)
+            if (InCinematic || InTransition)
                 return;
 
             // First, change the character to face that direction
@@ -714,8 +736,11 @@ namespace ChronoForce.Engine
                     }
 
                     // Check to see if the NPC can move that direction
+                    Point newPoint = new Point(mapActors[id].MapPosition.X + dx,
+                        mapActors[id].MapPosition.Y + dy);
                     if (mapInfo.IsPassable(mapActors[id].MapPosition, direction, map) &&
-                        NotBlocked(mapActors[id].MapPosition, direction))
+                        NotBlocked(mapActors[id].MapPosition, direction) &&
+                        !mapActors[id].IsRestricted(newPoint))
                     {
                         mapActors[id].MoveMapPosition(dx, dy);
                         Director.MoveNPC(mapActors[id], direction);
@@ -746,10 +771,25 @@ namespace ChronoForce.Engine
 
             if (entry != null)
             {
+                // Find the index to the map we're going to
+                int nextMap = mapInfo.MapName.FindIndex(
+                    delegate(string testEntry)
+                    {
+                        return (entry.Content.DestinationMap.Contains(testEntry));
+                    });
+
+                // If the next map is -1, we couldn't find the map, which means we wrote the
+                // content XML incorrectly
+                if (nextMap < 0)
+                {
+                    throw new NullReferenceException("NextMap is invalid!");
+                }
+
                 // Start transitioning to the new map
                 mapInfo.LastMap = mapInfo.CurrentMap;
-                mapInfo.CurrentMap = entry.Content.DestinationMap;
+                mapInfo.CurrentMap = nextMap;
                 mapInfo.CurrentMapLevel = entry.Content.DestinationMapLevel;
+                cinematicType = entry.Content.Type;
 
                 inCinematic = true;
 
@@ -763,46 +803,53 @@ namespace ChronoForce.Engine
         /// and floors of a building
         /// </summary>
         /// <param name="position">Exit position</param>
+        /// <param name="dx">Offset in x where the player is moving</param>
+        /// <param name="dy">Offset in y where the player is moving</param>
         private void TransitionMap(Point position, int dx, int dy)
         {
             Vector2 newPosition = new Vector2();
 
-            // Use the direction to get the proper offset
-
             // Change the map position to the new map position based on the exit position
             player.MapPosition = position;
 
-            // If the player position isn't the same as the camera, then we're at an edge case
-            // Move the camera to where the player is, update the position, and then update
-            // the maps so everything remains centered.
-            cameraBound = false;
-
-            if (MapInfo.CurrentMapLevel == 0)
+            // If the transition is to a building, shift the camera.  Note that if we're transitioning
+            // to another map, we don't do the camera follow.  Instead, we do a different fade later on.
+            if (cinematicType == CodeType.PortalBuilding)
             {
-                // Check the bounds of the map so the camera will move correctly
-                newPosition.X = MathHelper.Clamp(player.Position.X,
-                    ChronosSetting.WindowWidth / 2,
-                    mapInfo.MapSize.X - (ChronosSetting.WindowWidth / 2));
-                newPosition.Y = MathHelper.Clamp(player.Position.Y,
-                    ChronosSetting.WindowHeight / 2,
-                    mapInfo.MapSize.Y - (ChronosSetting.WindowHeight / 2));
+                // Move the camera to where the player is, update the position, and then update
+                // the maps so everything remains centered.  In the case of moving back to the base
+                // level and we're at the edge, move the camera within the bounds of the map
+                if (MapInfo.CurrentMapLevel == 0)
+                {
+                    // Check the bounds of the map so the camera will move correctly
+                    newPosition.X = MathHelper.Clamp(player.Position.X,
+                        ChronosSetting.WindowWidth / 2,
+                        mapInfo.MapSize.X - (ChronosSetting.WindowWidth / 2));
+                    newPosition.Y = MathHelper.Clamp(player.Position.Y,
+                        ChronosSetting.WindowHeight / 2,
+                        mapInfo.MapSize.Y - (ChronosSetting.WindowHeight / 2));
 
-                director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera, 
-                    newPosition, 10, true));
-            }
-            else
-            {
-                // Follow the party to the exit position
-                // FIX:  Need a way to tell it to go 40 px or whatever the character movement
-                // will be.  Place this inside the constants data?
-                newPosition.X = player.Position.X + (dx * 40);
-                newPosition.Y = player.Position.Y + (dy * 40);
-                director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera, 
-                    newPosition, 10, true));
+                    director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera,
+                        newPosition, 10, true));
+                }
+                else
+                {
+                    // Follow the party to the exit position
+                    // FIX:  Need a way to tell it to go 40 px or whatever the character movement
+                    // will be.  Place this inside the constants data?
+                    newPosition.X = player.Position.X + (dx * 40);
+                    newPosition.Y = player.Position.Y + (dy * 40);
+                    director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera,
+                        newPosition, 10, true));
+                }
+
+                // Disable following the party and camera bounds while transitioning
+                followParty = false;
+                cameraBound = false;
             }
 
-            // Disable following the party
-            followParty = false;
+            // Show that we're in transition for the camera
+            inTransition = true;
 
             // When the camera is finished moving, handle the signal
             director.SlotDone += CameraDoneHandler;
@@ -837,24 +884,35 @@ namespace ChronoForce.Engine
             {
                 cinematicTimer += elapsed;
 
-                // When a frame of action passes, update the alpha values
+                // When a frame of action passes, update the cinematic
                 if (cinematicTimer > cCinematicTime)
                 {
                     cinematicTimer -= cCinematicTime;
-                    fadeColor[0] = (byte)MathHelper.Clamp(fadeColor[0] - cFadeAmount, 0, 255);
-                    fadeColor[1] = (byte)MathHelper.Clamp(fadeColor[1] + cFadeAmount, 0, 255);
 
-                    // Update the tile grids for the new colors
-                    mapInfo.SetFade(mapInfo.LastMap, fadeColor[0]);
-                    mapInfo.SetFade(mapInfo.CurrentMap, fadeColor[1]);
-
-                    // When fadeColor[0] reaches 0, the cinematic is complete
-                    if (fadeColor[0] == 0)
+                    // For building transitions, update the alpha values
+                    if (cinematicType == CodeType.PortalBuilding)
                     {
-                        inCinematic = false;
-                        fadeColor[0] = 255;
-                        fadeColor[1] = 0;
-                        mapInfo.LastMap = mapInfo.CurrentMap;
+                        fadeColor[0] = (byte)MathHelper.Clamp(fadeColor[0] - cFadeAmount, 0, 255);
+                        fadeColor[1] = (byte)MathHelper.Clamp(fadeColor[1] + cFadeAmount, 0, 255);
+
+                        // Update the tile grids for the new colors
+                        mapInfo.SetFade(mapInfo.LastMap, fadeColor[0]);
+                        mapInfo.SetFade(mapInfo.CurrentMap, fadeColor[1]);
+
+                        // When fadeColor[0] reaches 0, the cinematic is complete
+                        if (fadeColor[0] == 0)
+                        {
+                            inCinematic = false;
+                            fadeColor[0] = 255;
+                            fadeColor[1] = 0;
+                            mapInfo.LastMap = mapInfo.CurrentMap;
+                        }
+                    }
+                    else if (cinematicType == CodeType.PortalMap)
+                    {
+                        // For map transitions, fade out the screen
+                        fadeColor[1] = (byte)MathHelper.Clamp(fadeColor[1] + cFadeAmount, 0, 255);
+
                     }
                 }
             }
@@ -930,6 +988,21 @@ namespace ChronoForce.Engine
 
             // TODO:  Load atmosphere layer that moves at a different speed than
             // the other layers
+
+            // If we're in cinematic, draw addition effects depending on the cinematic type
+            if (inCinematic)
+            {
+                // For map transitions, fade out the entire map
+                if (cinematicType == CodeType.PortalMap)
+                {
+                    spriteBatch.Begin();
+
+                    spriteBatch.Draw(blankTexture, ChronosSetting.WindowFullSize, 
+                        new Color(0, 0, 0, fadeColor[1]));
+
+                    spriteBatch.End();
+                }
+            }
 
             // Update debug status
             MapDebug.StatusMsg = statusMsg;

@@ -61,6 +61,9 @@ namespace ChronoForce.Parser
             completeString = "";
             // A partial string of added words
             smallString = "";
+            // Clear the dialog text
+            dialogText.Clear();
+
             int counter = 1;
 
             // Loop through the string and start added words
@@ -137,6 +140,8 @@ namespace ChronoForce.Parser
             completeString = "";
             // A partial string of added words
             smallString = "";
+            // Clear the dialog text
+            dialogText.Clear();
             int counter = 1;
 
             // Loop through the string and start added words

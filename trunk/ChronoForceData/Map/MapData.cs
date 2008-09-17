@@ -39,10 +39,6 @@ namespace ChronoForceData.Map
 
         #region Fields
 
-        // Graphics and content manager
-        GraphicsDevice graphics;
-        ContentManager contents;
-
         // Tile information
         Texture2D tileTexture;
         SpriteSheet tileSheet;
@@ -328,20 +324,35 @@ namespace ChronoForceData.Map
             // map correctly.
             // By default, the base map is always at (0,0) and any other base maps
             int xPos, yPos;
-            int destMap;
+            int currMap, destMap;
             for (int i = 0; i < codeEntries.Count; i++)
             {
-                destMap = codeEntries[i].Content.DestinationMap;
+                // Get the index to the destination map
+                destMap = mapName.FindIndex(
+                    delegate(string testEntry)
+                    {
+                        return (codeEntries[i].Content.DestinationMap.Contains(testEntry));
+                    });
 
                 // If the destination is lower in ID than the current or 0, don't do anything since
                 // the previous would have set the position already
                 if (destMap > 0 && codeEntries[i].Content.MapLevel < codeEntries[i].Content.DestinationMapLevel)
                 {
-                    // Calculate the position of the map to render
+                    // Find the current map number based on the content name
+                    // Assume the map name is in the data, or else, we wrote the content incorrectly
+                    currMap = mapName.FindIndex(
+                        delegate(string testEntry)
+                        {
+                            return (codeEntries[i].ContentName.Contains(testEntry));
+                        });
+
+                    // Calculate the map position to render
                     xPos = (int)
-                        (codeEntries[i].MapPosition.X - codeEntries[i].Content.DestinationMapPosition.X) * tileWidth;
+                        ((codeEntries[i].MapPosition.X - codeEntries[i].Content.DestinationMapPosition.X)
+                        * tileWidth) + (int)bottomLayer[currMap].Position.X;
                     yPos = (int)
-                        (codeEntries[i].MapPosition.Y - codeEntries[i].Content.DestinationMapPosition.Y) * tileHeight;
+                        ((codeEntries[i].MapPosition.Y - codeEntries[i].Content.DestinationMapPosition.Y)
+                        * tileHeight) + (int)bottomLayer[currMap].Position.Y;
 
                     bottomLayer[destMap].SetPosition(xPos, yPos);
                     middleLayer[destMap].SetPosition(xPos, yPos);

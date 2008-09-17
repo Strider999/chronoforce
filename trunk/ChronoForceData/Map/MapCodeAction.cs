@@ -44,7 +44,7 @@ namespace ChronoForceData.Map
         // Level of the map (0 is the base, 1 is a building, 2 is a room inside a building, etc.
         int mapLevel;
         // Exit location where the portal takes the player
-        int destinationMap;
+        string destinationMap;
         int destinationMapLevel;
         Point destinationMapPosition;
 
@@ -99,7 +99,7 @@ namespace ChronoForceData.Map
         /// Which map the portal takes the player when stepped on
         /// </summary>
         [ContentSerializer(Optional = true)]
-        public int DestinationMap
+        public string DestinationMap
         {
             get { return destinationMap; }
             set { destinationMap = value; }
@@ -155,7 +155,7 @@ namespace ChronoForceData.Map
 
                 // Read the in portal data for now
                 mCode.MapLevel = input.ReadInt32();
-                mCode.DestinationMap = input.ReadInt32();
+                mCode.DestinationMap = input.ReadString();
                 mCode.DestinationMapLevel = input.ReadInt32();
                 mCode.DestinationMapPosition = input.ReadObject<Point>();
 
