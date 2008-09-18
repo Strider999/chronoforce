@@ -32,18 +32,21 @@ namespace ChronoForce.Screens
             MenuEntry startMenuEntry = new MenuEntry("Start");
             MenuEntry continueMenuEntry = new MenuEntry("Continue");
             MenuEntry gameOverMenuEntry = new MenuEntry("Show Game Over");
+            MenuEntry testTitleMenuEntry = new MenuEntry("Test Title Transition");
             MenuEntry exitMenuEntry = new MenuEntry("Quit");
 
             // Hook up menu event handlers.
             startMenuEntry.Selected += StartMenuEntrySelected;
             continueMenuEntry.Selected += ContinueMenuEntrySelected;
             gameOverMenuEntry.Selected += GameOverMenuEntrySelected;
+            testTitleMenuEntry.Selected += TestTitleMenuEntrySelected;
             exitMenuEntry.Selected += OnCancel;
 
             // Add entries to the menu.
             MenuEntries.Add(startMenuEntry);
             MenuEntries.Add(continueMenuEntry);
             MenuEntries.Add(gameOverMenuEntry);
+            MenuEntries.Add(testTitleMenuEntry);
             MenuEntries.Add(exitMenuEntry);
 
             // Make the first menu visible
@@ -80,6 +83,16 @@ namespace ChronoForce.Screens
         void GameOverMenuEntrySelected(object sender, EventArgs e)
         {
             ScreenManager.AddScreen(new GameOverScreen());
+        }
+
+        /// <summary>
+        /// Test the title transition
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void TestTitleMenuEntrySelected(object sender, EventArgs e)
+        {
+            ScreenManager.AddScreen(new MapTitleScreen("MainMenu!", "Second Floor"));
         }
 
         /// <summary>

@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ChronoForce.Base;
+using ChronoForceData;
 #endregion
 
 namespace ChronoForce.Screens
@@ -321,7 +322,7 @@ namespace ChronoForce.Screens
             }
             else
             {
-                if (input.IsNewKeyPress(Keys.A))
+                if (input.IsNewKeyPress(ChronosSetting.ConfirmKey))
                 {
                     // Mark that the button has bee pressed.  Under draw, the text will either
                     // display fully (if still in the process) or continue
@@ -375,7 +376,7 @@ namespace ChronoForce.Screens
 
             // Viewport sizes used for centering the dialog if necessary
             Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
-            Vector2 viewportSize = viewportSize = new Vector2(viewport.Width, viewport.Height);
+            Vector2 viewportSize = new Vector2(viewport.Width, viewport.Height);
 
             // If we're autosizing the dialog, do this
             if (autoSizeDialog)

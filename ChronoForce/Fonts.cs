@@ -59,6 +59,15 @@ namespace ChronoForce
             get { return debugFont; }
         }
 
+        private static SpriteFont titleFont;
+        /// <summary>
+        /// Returns the title font used for map and chapter titles
+        /// </summary>
+        public static SpriteFont TitleFont
+        {
+            get { return titleFont; }
+        }
+
         #endregion
 
         #region Initialization
@@ -74,10 +83,11 @@ namespace ChronoForce
                 throw new ArgumentNullException("contentManager");
             }
 
-            debugFont = contentManager.Load<SpriteFont>("debugfont");
-            menuFont = contentManager.Load<SpriteFont>("menufont");
-            generalFont = contentManager.Load<SpriteFont>("generalfont");
-            battleFont = contentManager.Load<SpriteFont>("battleFont");
+            debugFont = contentManager.Load<SpriteFont>(@"Fonts\debugfont");
+            menuFont = contentManager.Load<SpriteFont>(@"Fonts\menufont");
+            generalFont = contentManager.Load<SpriteFont>(@"Fonts\generalfont");
+            battleFont = contentManager.Load<SpriteFont>(@"Fonts\battleFont");
+            titleFont = contentManager.Load<SpriteFont>(@"Fonts\titleFont");
         }
 
         /// <summary>
@@ -88,6 +98,8 @@ namespace ChronoForce
             debugFont = null;
             menuFont = null;
             generalFont = null;
+            battleFont = null;
+            titleFont = null;
         }
 
         #endregion
