@@ -4,6 +4,7 @@
 //
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
+// - Modified by David Hsu
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -52,6 +53,19 @@ namespace ChronoForce
 
         bool isPopup = false;
 
+
+        bool isOverlay = false;
+
+        /// <summary>
+        /// Used for screens that overlay information on top of another screen.
+        /// As such, these will pass on the input to the next screen as well as
+        /// drawing itself and the next screen.
+        /// </summary>
+        public bool IsOverlay
+        {
+            get { return isOverlay; }
+            protected set { isOverlay = value; }
+        }
 
         /// <summary>
         /// Indicates how long the screen takes to

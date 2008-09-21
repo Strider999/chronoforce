@@ -39,6 +39,7 @@
     <Compile Include="Actions\ActionScriptWriter.cs" />
     <Compile Include="Character\CharacterBaseWriter.cs" />
     <Compile Include="Character\CharacterNPCWriter.cs" />
+    <Compile Include="Character\DialogDataWriter.cs" />
     <Compile Include="ContentEntryWriter.cs" />
     <Compile Include="Graphics\AnimatingSpriteWriter.cs" />
     <Compile Include="ChronoForceWriter.cs" />

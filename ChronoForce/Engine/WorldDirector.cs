@@ -107,7 +107,11 @@ namespace ChronoForce.Engine
         /// <param name="e"></param>
         void PartyMoveHandler(object o, EventArgs e)
         {
-            // Nothing for now
+            // For some reason, it's better to move a character and reset the animation
+            // instead of doing it by action as this causes no stuttering/glitching while
+            // the action does for continuous movement for some reason
+            CharacterBase player = (CharacterBase)moveSlot.Actor;
+            player.Sprite.Motion = "Face";
         }
 
         #endregion
@@ -199,7 +203,9 @@ namespace ChronoForce.Engine
         /// <param name="direction">Direction to move the party</param>
         public void MoveParty(CharacterBase actor, MapDirection direction)
         {
-            moveSlot.Action = ActionCommand.WalkTo;
+            actor.Sprite.Motion = "Walk";
+
+            moveSlot.Action = ActionCommand.MoveTo;
             moveSlot.Actor = actor;
             moveSlot.IsAbsolute = false;
             moveSlot.Frames = cDefaultMoveFrame;
@@ -222,7 +228,7 @@ namespace ChronoForce.Engine
 
             // Mark that the moveSlot is active again
             moveSlot.Reset();
-            //moveSlot.Complete += PartyMoveHandler;
+            moveSlot.Complete += PartyMoveHandler;
         }
 
         /// <summary>

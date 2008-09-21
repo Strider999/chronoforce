@@ -81,12 +81,13 @@ namespace ChronoForce.Screens
             worldSprite = content.Load<CharacterBase>("TestSprite");
             worldSprite.Sprite.ScreenCenter = ChronosSetting.WindowSize / 2;
 
+            // DEBUG:  Load the session
+            Session.LoadSession(ScreenManager);
+
             // DEBUG:  Load a map
             //gameEngine.mapEngine.loadMap("Maps\\mountaintest.map");
-            MapEngine.LoadMapEngine("Maps\\newmaptest.map", ScreenManager.GraphicsDevice, content, 
+            MapEngine.LoadMapEngine("Maps\\newmaptest.map", ScreenManager.GraphicsDevice, content,
                 worldSprite, director);
-
-            MapEngine.FollowParty = true;
         }
 
 
