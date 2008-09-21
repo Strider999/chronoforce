@@ -41,6 +41,7 @@
     <Compile Include="Actions\ActionSlot.cs" />
     <Compile Include="Actions\BattleText.cs" />
     <Compile Include="Base\Camera2D.cs" />
+    <Compile Include="Character\DialogData.cs" />
     <Compile Include="ChronosSetting.cs" />
     <Compile Include="ContentEntry.cs" />
     <Compile Include="ContentObject.cs" />

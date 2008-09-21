@@ -68,9 +68,42 @@ namespace ChronoForce.Screens
         // Counter for transitions
         float transitionCounter = 0.3f;
 
+        // True if the screen is displaying
+        bool isDisplaying = false;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Title to display in large letters for the overlay
+        /// </summary>
+        public string Title
+        {
+            get { return title; }
+            set { title = value; }
+        }
+
+        /// <summary>
+        /// Information to display below the title
+        /// </summary>
+        public string Subtitle
+        {
+            get { return subtitle; }
+            set { subtitle = value; }
+        }
+
         #endregion
 
         #region Initialization
+
+        /// <summary>
+        /// Default contructor that loads no strings
+        /// </summary>
+        public MapTitleScreen()
+        {
+            IsOverlay = true;
+        }
 
         /// <summary>
         /// Makes the map title bar with title and subtitle
@@ -78,6 +111,7 @@ namespace ChronoForce.Screens
         /// <param name="titleArg">Name of the map or series of maps</param>
         /// <param name="messageArg">Name of the specific map (name, floor level, etc.)</param>
         public MapTitleScreen(string titleArg, string subtitleArg)
+            :this()
         {
             title = titleArg;
             subtitle = subtitleArg;
@@ -96,6 +130,28 @@ namespace ChronoForce.Screens
             backTexture = content.Load<Texture2D>("blank");
         }
 
+
+        #endregion
+
+        #region Public Functions
+
+        /// <summary>
+        /// Resets the values for the screen
+        /// </summary>
+        public void ResetScreen()
+        {
+            if (isDisplaying)
+            {
+                isDisplaying = false;
+                ExitScreen();
+            }
+
+            alpha = 0f;
+            frameCounter = 0;
+            transitionCounter = 0.3f;
+            delayTimer = 0;
+            position = 1f;
+        }
 
         #endregion
 
@@ -127,6 +183,7 @@ namespace ChronoForce.Screens
                 // hasn't moved, so we transition in
                 if (alpha < 1 && frameCounter == 0)
                 {
+                    isDisplaying = true;
                     transitionCounter += cStepSize;
 
                     alpha = MathHelper.Clamp(alpha + GetStepSize(transitionCounter), 0, 1);
@@ -148,7 +205,10 @@ namespace ChronoForce.Screens
 
                     // Once the alpha is 0, we exit the screen
                     if (alpha == 0)
+                    {
+                        isDisplaying = false;
                         ExitScreen();
+                    }
                 }
             }
 
@@ -188,7 +248,7 @@ namespace ChronoForce.Screens
             spriteBatch.Begin(SpriteBlendMode.AlphaBlend);
 
             // Render the faded back rectangle
-            spriteBatch.Draw(backTexture, backPosition, new Color(200, 200, 200, (byte)(alpha * cBackAlpha * 255)) );
+            spriteBatch.Draw(backTexture, backPosition, new Color(0, 0, 0, (byte)(alpha * cBackAlpha * 255)) );
 
             // Render the strings
             spriteBatch.DrawString(titleFont, title, titlePos, new Color(255, 255, 255, (byte)(alpha * 255)));

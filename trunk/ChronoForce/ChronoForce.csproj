@@ -86,7 +86,7 @@
     <Compile Include="ScreenManager\MenuEntry.cs" />
     <Compile Include="ScreenManager\MenuScreen.cs" />
     <Compile Include="Screens\MessageBoxScreen.cs" />
-    <Compile Include="Session\Session.cs" />
+    <Compile Include="Engine\Session.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

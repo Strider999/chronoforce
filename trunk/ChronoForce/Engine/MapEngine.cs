@@ -59,7 +59,7 @@ namespace ChronoForce.Engine
         // Cinamtic time delay for each frame
         const int cCinematicTime = 2;
         // Fade amount for each frame
-        const int cFadeAmount = 4;
+        const int cFadeAmount = 40;
 
         #endregion
 
@@ -110,6 +110,12 @@ namespace ChronoForce.Engine
         
         // Color for doing fade controls
         byte[] fadeColor = new byte[2];
+        // Universal alpha control used by actions
+        Color actionFade;
+        // Phase of the map change
+        int cinematicPhase = 0;
+        // Stores the next map for the map change
+        int cinematicNextMap;
 
         // Debugging variables to control
         bool[] showLayer;
@@ -344,16 +350,17 @@ namespace ChronoForce.Engine
             singleton.director = director;
 
             // Load the map file
-            //singleton.mapInfo = new MapData(graphics, content, filename);
+            // DEBUG:  Loading default map
             singleton.mapInfo = content.Load<MapData>(@"Maps/MapTest");
 
-            // Load tests
+            // DEBUG: Load tests
             singleton.LoadTests();
 
             // Set Up a 2D Camera
             singleton.camera = new Camera2D();
 
             ResetToInitialPositions();
+            singleton.RepositionPlayer();
 
             return true;
         }
@@ -381,10 +388,6 @@ namespace ChronoForce.Engine
             // DEBUG:  Adds the NPCs to the map
             for (int i = 0; i < mapInfo.BottomGrid.Count; i++)
                 mapNPC.Add(3);
-
-            // DEBUG:  Position the player correctly (probably needed, but maybe not here)
-            player.Position = new Vector2(-1 * (player.Sprite.FrameDimension.X - mapInfo.TileWidth),
-                -1 * (player.Sprite.FrameDimension.Y - mapInfo.TileHeight));
         }
 
         /// <summary>
@@ -786,10 +789,22 @@ namespace ChronoForce.Engine
                 }
 
                 // Start transitioning to the new map
-                mapInfo.LastMap = mapInfo.CurrentMap;
-                mapInfo.CurrentMap = nextMap;
-                mapInfo.CurrentMapLevel = entry.Content.DestinationMapLevel;
                 cinematicType = entry.Content.Type;
+
+                // If it's a building transition, inter fade the two maps
+                if (cinematicType == CodeType.PortalBuilding)
+                {
+                    mapInfo.TransitionMap = mapInfo.CurrentMap;
+                    mapInfo.CurrentMap = nextMap;
+                    mapInfo.CurrentMapLevel = entry.Content.DestinationMapLevel;
+                }
+                else if (cinematicType == CodeType.PortalMap)
+                {
+                    // For map changes, fade off the current map first before switching
+                    // to the next map.
+                    cinematicNextMap = nextMap;
+                    mapInfo.CurrentMapLevel = entry.Content.DestinationMapLevel;
+                }
 
                 inCinematic = true;
 
@@ -821,14 +836,21 @@ namespace ChronoForce.Engine
                 // level and we're at the edge, move the camera within the bounds of the map
                 if (MapInfo.CurrentMapLevel == 0)
                 {
+                    int offsetX = -1 * (player.Sprite.FrameDimension.X - mapInfo.TileWidth);
+                    int offsetY = -1 * (player.Sprite.FrameDimension.Y - mapInfo.TileHeight);
+
+                    // Use the map position to determine where the camera will go
+                    newPosition.X = (player.MapPosition.X * mapInfo.TileWidth) + offsetX;
+                    newPosition.Y = (player.MapPosition.Y * mapInfo.TileHeight) + offsetY;
+
                     // Check the bounds of the map so the camera will move correctly
-                    newPosition.X = MathHelper.Clamp(player.Position.X,
+                    newPosition.X = MathHelper.Clamp(newPosition.X,
                         ChronosSetting.WindowWidth / 2,
                         mapInfo.MapSize.X - (ChronosSetting.WindowWidth / 2));
-                    newPosition.Y = MathHelper.Clamp(player.Position.Y,
+                    newPosition.Y = MathHelper.Clamp(newPosition.Y,
                         ChronosSetting.WindowHeight / 2,
                         mapInfo.MapSize.Y - (ChronosSetting.WindowHeight / 2));
-
+                    
                     director.AddActionSlot(new ActionSlot(ActionCommand.MoveTo, camera,
                         newPosition, 10, true));
                 }
@@ -846,13 +868,51 @@ namespace ChronoForce.Engine
                 // Disable following the party and camera bounds while transitioning
                 followParty = false;
                 cameraBound = false;
-            }
 
-            // Show that we're in transition for the camera
-            inTransition = true;
+                // Show that we're in transition for the camera
+                inTransition = true;
+            }
 
             // When the camera is finished moving, handle the signal
             director.SlotDone += CameraDoneHandler;
+        }
+
+        /// <summary>
+        /// Special helper function that positions the player pixel position based on the map position
+        /// and centers the camera on the player.
+        /// </summary>
+        private void RepositionPlayer()
+        {
+            int offsetX = -1 * (player.Sprite.FrameDimension.X - mapInfo.TileWidth);
+            int offsetY = -1 * (player.Sprite.FrameDimension.Y - mapInfo.TileHeight);
+
+            player.Position = new Vector2( (player.MapPosition.X * mapInfo.TileWidth) + offsetX, 
+                (player.MapPosition.Y * mapInfo.TileHeight) + offsetY);
+            MoveCamera(player.Position);
+        }
+
+        #endregion
+
+        #region Helper Functions for Actions
+
+        /// <summary>
+        /// Used by actions to change the map.
+        /// </summary>
+        /// <param name="newMap">New map to go to</param>
+        public static void ChangeMap(int newMap)
+        {
+            MapInfo.TransitionMap = MapInfo.CurrentMap;
+            MapInfo.CurrentMap = newMap;
+        }
+
+        /// <summary>
+        /// Universal fader which takes effect after all rendering so everything
+        /// is faded out.
+        /// </summary>
+        /// <param name="fadeColor">Determines fade color and alpha amount</param>
+        public static void FadeScreen(Color fadeColor)
+        {
+            singleton.actionFade = fadeColor;
         }
 
         #endregion
@@ -896,7 +956,7 @@ namespace ChronoForce.Engine
                         fadeColor[1] = (byte)MathHelper.Clamp(fadeColor[1] + cFadeAmount, 0, 255);
 
                         // Update the tile grids for the new colors
-                        mapInfo.SetFade(mapInfo.LastMap, fadeColor[0]);
+                        mapInfo.SetFade(mapInfo.TransitionMap, fadeColor[0]);
                         mapInfo.SetFade(mapInfo.CurrentMap, fadeColor[1]);
 
                         // When fadeColor[0] reaches 0, the cinematic is complete
@@ -905,14 +965,49 @@ namespace ChronoForce.Engine
                             inCinematic = false;
                             fadeColor[0] = 255;
                             fadeColor[1] = 0;
-                            mapInfo.LastMap = mapInfo.CurrentMap;
+                            mapInfo.TransitionMap = mapInfo.CurrentMap;
                         }
                     }
                     else if (cinematicType == CodeType.PortalMap)
                     {
-                        // For map transitions, fade out the screen
-                        fadeColor[1] = (byte)MathHelper.Clamp(fadeColor[1] + cFadeAmount, 0, 255);
+                        // For map changes, there's 3 phases:
+                        // 1. Fade out screen
+                        // 2. Change map and position player
+                        // 3. Fade in screen
+                        if (cinematicPhase == 0)
+                        {
+                            // For map transitions, fade out the screen
+                            fadeColor[1] = (byte)MathHelper.Clamp(fadeColor[1] + cFadeAmount, 0, 255);
 
+                            if (fadeColor[1] == 255)
+                            {
+                                cinematicPhase++;
+                            }
+                        }
+                        else if (cinematicPhase == 1)
+                        {
+                            // Change the map and player pixel positions.  Note that the
+                            // map position has already been changed when the player stepped
+                            // on the portal
+                            mapInfo.CurrentMap = mapInfo.TransitionMap = cinematicNextMap;
+                            RepositionPlayer();
+
+                            // Display map name
+                            Session.CreateMapTitle("Debugging Testlands", mapInfo.MapName[mapInfo.CurrentMap]);
+
+                            cinematicPhase++;
+                        }
+                        else if (cinematicPhase == 2)
+                        {
+                            // Fade in the screen
+                            fadeColor[1] = (byte)MathHelper.Clamp(fadeColor[1] - cFadeAmount, 0, 255);
+
+                            if (fadeColor[1] == 0)
+                            {
+                                cinematicPhase = 0;
+                                inCinematic = false;
+                            }
+                        }
                     }
                 }
             }

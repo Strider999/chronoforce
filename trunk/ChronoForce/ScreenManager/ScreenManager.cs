@@ -188,12 +188,14 @@ namespace ChronoForce
                     {
                         screen.HandleInput(input, (int)gameTime.ElapsedGameTime.TotalMilliseconds);
 
-                        otherScreenHasFocus = true;
+                        // If this screen is an overlay, pass on the focus
+                        if (!screen.IsOverlay)
+                            otherScreenHasFocus = true;
                     }
 
                     // If this is an active non-popup, inform any subsequent
                     // screens that they are covered by it.
-                    if (!screen.IsPopup)
+                    if (!screen.IsPopup && !screen.IsOverlay)
                         coveredByOtherScreen = true;
                 }
             }

@@ -58,7 +58,7 @@ namespace ChronoForceData.Map
         //private float accumulator;
 
         // Which map to render
-        int lastMap = 0;
+        int transitionMap = 0;
         int currentMap = 0;
 
         // Current map level
@@ -233,10 +233,10 @@ namespace ChronoForceData.Map
         /// The previous map before the transition
         /// </summary>
         [ContentSerializerIgnore]
-        public int LastMap
+        public int TransitionMap
         {
-            get { return lastMap; }
-            set { lastMap = value; }
+            get { return transitionMap; }
+            set { transitionMap = value; }
         }
 
         /// <summary>
@@ -432,17 +432,17 @@ namespace ChronoForceData.Map
 
             // If the lastMap isn't the same as currentMap, update it as well as
             // we're most likely in the middle of transitioning
-            if (lastMap != currentMap)
+            if (transitionMap != currentMap)
             {
                 // Rotation
-                topLayer[lastMap].CameraRotation = middleLayer[lastMap].CameraRotation =
-                    bottomLayer[lastMap].CameraRotation = camera.Rotation;
+                topLayer[transitionMap].CameraRotation = middleLayer[transitionMap].CameraRotation =
+                    bottomLayer[transitionMap].CameraRotation = camera.Rotation;
                 // Zoom
-                topLayer[lastMap].CameraZoom = middleLayer[lastMap].CameraZoom =
-                    bottomLayer[lastMap].CameraZoom = camera.Zoom;
+                topLayer[transitionMap].CameraZoom = middleLayer[transitionMap].CameraZoom =
+                    bottomLayer[transitionMap].CameraZoom = camera.Zoom;
                 // Position
-                topLayer[lastMap].CameraPosition = middleLayer[lastMap].CameraPosition =
-                    bottomLayer[lastMap].CameraPosition = camera.Position;
+                topLayer[transitionMap].CameraPosition = middleLayer[transitionMap].CameraPosition =
+                    bottomLayer[transitionMap].CameraPosition = camera.Position;
             }
         }
 
@@ -477,14 +477,14 @@ namespace ChronoForceData.Map
             if (top)
                 topLayer[currentMap].Draw(spriteBatch);
 
-            if (lastMap != currentMap)
+            if (transitionMap != currentMap)
             {
                 if (bottom)
-                    bottomLayer[lastMap].Draw(spriteBatch);
+                    bottomLayer[transitionMap].Draw(spriteBatch);
                 if (middle)
-                    middleLayer[lastMap].Draw(spriteBatch);
+                    middleLayer[transitionMap].Draw(spriteBatch);
                 if (top)
-                    topLayer[lastMap].Draw(spriteBatch);
+                    topLayer[transitionMap].Draw(spriteBatch);
             }
         }
 
