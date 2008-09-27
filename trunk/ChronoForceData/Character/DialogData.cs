@@ -27,6 +27,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// Person who is speaking the dialog
         /// </summary>
+        [ContentSerializer(Optional = true)]
         public string Speaker
         {
             get { return speaker; }
@@ -42,6 +43,29 @@ namespace ChronoForceData.Character
         {
             get { return dialog; }
             set { dialog = value; }
+        }
+
+        #endregion
+
+        #region Contructors
+
+        /// <summary>
+        /// Default contructor for XML loading
+        /// </summary>
+        public DialogData()
+        {
+            // Does nothing
+        }
+
+        /// <summary>
+        /// Constructor that loads the speaker and dialog into the class
+        /// </summary>
+        /// <param name="speaker">Person who is speaking the text</param>
+        /// <param name="dialog">What the person is saying</param>
+        public DialogData(string speaker, string dialog)
+        {
+            this.speaker = speaker;
+            this.dialog = dialog;
         }
 
         #endregion

@@ -66,7 +66,7 @@ namespace ChronoForceData.Actions
         /// <summary>
         /// Position of the object
         /// </summary>
-        protected Vector2 positionValue;
+        protected Vector2 positionValue = Vector2.Zero;
 
         /// <summary>
         /// Position of the object
@@ -76,6 +76,35 @@ namespace ChronoForceData.Actions
         {
             get { return positionValue; }
             set { positionValue = value; }
+        }
+
+        #endregion
+
+        #region Content Type Reader
+
+        /// <summary>
+        /// Reads an action object from the pipeline
+        /// </summary>
+        public class ActionObjectReader : ContentTypeReader<ActionObject>
+        {
+            /// <summary>
+            /// Reads an action object from the content pipeline.
+            /// </summary>
+            protected override ActionObject Read(ContentReader input,
+                ActionObject existingInstance)
+            {
+                ActionObject actionObj = existingInstance;
+                if (existingInstance == null)
+                {
+                    actionObj = new ActionObject();
+                }
+
+                actionObj.Name = input.ReadString();
+                actionObj.ObjectType = (ActionObjectType)input.ReadInt32();
+                actionObj.Position = input.ReadVector2();
+
+                return actionObj;
+            }
         }
 
         #endregion

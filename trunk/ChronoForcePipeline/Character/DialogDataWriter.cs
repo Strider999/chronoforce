@@ -35,7 +35,7 @@ namespace ChronoForcePipeline
         protected override void Write(ContentWriter output, DialogData value)
         {
             // Write the name of the speaker
-            output.Write(value.Speaker);
+            output.Write( (value.Speaker == null) ? "" : value.Speaker );
 
             // Write the dialog
             output.Write(value.Dialog);

@@ -142,7 +142,9 @@ namespace ChronoForce.Screens
         /// <param name="elapsed">Time since last update in seconds</param>
         public override void HandleInput(InputState input, int elapsed)
         {
-            string dialogText, npcName;
+            List<DialogData> dialogText;
+            string npcName;
+            string sampleDialogText;
 
             if (input == null)
                 throw new ArgumentNullException("input");
@@ -157,10 +159,10 @@ namespace ChronoForce.Screens
             }
             else if (input.IsNewKeyPress(Keys.F)) // DEBUG testing controls
             {
-                dialogText = "This is a test and only a test.  Hopefully, the splitter works correctly" +
+                sampleDialogText = "This is a test and only a test.  Hopefully, the splitter works correctly" +
                     " and performs or exceeds my expectations.  Go go parser!  Work!  And more text " +
                     "is being added to help add fluff and maybe break the code so I can fix it.";
-                List<string> testList = DialogParser.ParseString(dialogText, Fonts.GeneralFont,
+                List<string> testList = DialogParser.ParseString(sampleDialogText, Fonts.GeneralFont,
                     150, 4);
                 ScreenManager.AddScreen(new DialogBoxScreen("Tester", testList,
                     DialogBoxScreen.DialogSpeed.Fast, 1000));
@@ -216,10 +218,8 @@ namespace ChronoForce.Screens
                 // See if there's anyone in the direction to talk to
                 if (MapEngine.CanTalk(out npcName, out dialogText))
                 {
-                    List<string> testList = DialogParser.ParseString(dialogText, Fonts.GeneralFont,
-                            150, 4);
-                    ScreenManager.AddScreen(new DialogBoxScreen(npcName, testList,
-                        DialogBoxScreen.DialogSpeed.Fast));
+                    ScreenManager.AddScreen(new DialogBoxScreen(dialogText, DialogBoxScreen.DialogSpeed.Fast,
+                        DialogBoxScreen.DialogPlacement.Bottom));
                 }
             }
         }

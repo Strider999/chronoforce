@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actions\ActionScriptWriter.cs" />
+    <Compile Include="Actions\ActionObjectWriter.cs" />
     <Compile Include="Character\CharacterBaseWriter.cs" />
     <Compile Include="Character\CharacterNPCWriter.cs" />
     <Compile Include="Character\DialogDataWriter.cs" />
