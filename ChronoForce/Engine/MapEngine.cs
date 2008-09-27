@@ -586,7 +586,7 @@ namespace ChronoForce.Engine
         /// <param name="name">Name of NPC talking</param>
         /// <param name="text">Output of the text the NPC speaks</param>
         /// <returns>True if there's a character</returns>
-        public static bool CanTalk(out string name, out string text)
+        public static bool CanTalk(out string name, out List<DialogData> text)
         {
             int dx = 0, dy = 0;
             string npcFace = "Front";
@@ -625,14 +625,14 @@ namespace ChronoForce.Engine
                     // Found an NPC, so we make the NPC face the player and return the dialog text
                     singleton.mapActors[i].Sprite.Direction = npcFace;
                     name = singleton.mapActors[i].Name;
-                    text = singleton.mapActors[i].DialogText[0];
+                    text = singleton.mapActors[i].DialogText;
                     return true;
                 }
             }
 
             // Didn't find anything
             name = "";
-            text = "";
+            text = null;
             return false;
         }
 

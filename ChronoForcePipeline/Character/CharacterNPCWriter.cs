@@ -50,7 +50,7 @@ namespace ChronoForcePipeline
             // Write the NPC specific information
             output.Write(value.Moves);
             output.Write(value.MaxRadius);
-            output.WriteObject<List<string>>(value.DialogText);
+            output.WriteObject<List<DialogData>>(value.DialogText);
             output.WriteObject<List<Point>>(value.RestrictedPositions);
             output.Write(value.IsMerchant);
         }

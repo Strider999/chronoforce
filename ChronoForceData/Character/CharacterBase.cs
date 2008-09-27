@@ -218,9 +218,9 @@ namespace ChronoForceData.Character
                     charBase = new CharacterBase();
                 }
 
-                charBase.Name = input.ReadString();
-                charBase.ObjectType = (ActionObjectType)input.ReadInt32();
-                charBase.Position = input.ReadVector2();
+                // Basic action object information
+                input.ReadRawObject<ActionObject>(charBase as ActionObject);
+
                 charBase.MapPosition = input.ReadObject<Point>();
                 charBase.Sprite = input.ReadObject<AnimatingSprite>();
 

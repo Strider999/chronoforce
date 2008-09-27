@@ -17,6 +17,7 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
+using ChronoForceData.Actions;
 using ChronoForceData.Character;
 using ChronoForceData.Graphics;
 #endregion
@@ -32,16 +33,22 @@ namespace ChronoForcePipeline
     [ContentTypeWriter]
     public class CharacterBaseWriter : ChronoForceWriter<CharacterBase>
     {
+        ActionObjectWriter actionObjWriter = null;
+
+        protected override void Initialize(ContentCompiler compiler)
+        {
+            actionObjWriter = compiler.GetTypeWriter(typeof(ActionObject))
+                as ActionObjectWriter;
+
+            base.Initialize(compiler);
+        }
+
         protected override void Write(ContentWriter output, CharacterBase value)
         {
-            // Write the name of the character
-            output.Write(value.Name);
-
-            // Write the object type
-            output.Write((int)value.ObjectType);
+            // Write the basic action object
+            output.WriteRawObject<ActionObject>(value as ActionObject, actionObjWriter);
 
             // Write the object position
-            output.Write(value.Position);
             output.WriteObject<Point>(value.MapPosition);
 
             output.WriteObject<AnimatingSprite>(value.Sprite);

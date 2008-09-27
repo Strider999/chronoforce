@@ -35,7 +35,7 @@ namespace ChronoForceData.Character
         // Starting position of the NPC
         Point startingPos;
         // List of strings that the character can speak
-        List<string> dialogText;
+        List<DialogData> dialogText;
         // Timer for moving the NPC.  This makes each NPC have their own timer so
         // they don't all move at the same time (unless we want them to)
         int npcTimer = 0;
@@ -101,7 +101,7 @@ namespace ChronoForceData.Character
         /// <summary>
         /// List of spoken dialog by the NPC
         /// </summary>
-        public List<string> DialogText
+        public List<DialogData> DialogText
         {
             get { return dialogText; }
             set { dialogText = value; }
@@ -277,9 +277,17 @@ namespace ChronoForceData.Character
                 // NPC specific information
                 npc.Moves = input.ReadBoolean();
                 npc.MaxRadius = input.ReadInt32();
-                npc.DialogText = input.ReadObject<List<string>>();
+                npc.DialogText = input.ReadObject<List<DialogData>>();
                 npc.RestrictedPositions = input.ReadObject<List<Point>>();
                 npc.IsMerchant = input.ReadBoolean();
+
+                // Look through the dialog text and locate any empty speakers
+                // Fill these with the NPC name
+                foreach (DialogData data in npc.DialogText)
+                {
+                    if (data.Speaker == String.Empty)
+                        data.Speaker = npc.Name;
+                }
 
                 return npc;
             }
