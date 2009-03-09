@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <Asset Type="ChronoForceData.Map.MapCodeAction">
+	  <MapCodeName>Testmap</MapCodeName>
+	  <Code>1</Code>
+	  <Type>1</Type>
+	  <DestinationMap>1</DestinationMap>
+	  <DestinationMapPosition>1 1</DestinationMapPosition>
+  </Asset>
+</XnaContent>
