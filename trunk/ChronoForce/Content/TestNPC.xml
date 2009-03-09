@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <Asset Type="ChronoForceData.Character.CharacterNPC">
+	  <Name>NPCLocke</Name>
+	  <ObjectType>2</ObjectType>
+	  <Position>40 40</Position>
+	  <MapPosition>1 1</MapPosition>
+	  <Sprite>
+		  <TextureName>lockesprite</TextureName>
+		  <TextureType>Player</TextureType>
+		  <FrameDimension>32 48</FrameDimension>
+		  <FramesPerRow>4</FramesPerRow>
+		  <Padding>2</Padding>
+		  <Type>World</Type>
+		  <Motion>Face</Motion>
+		  <Direction>Right</Direction>
+		  <Sprites>
+			  <Item>
+				  <Key>WorldFaceBack</Key>
+				  <Value>
+					  <StartingFrame>0</StartingFrame>
+					  <EndingFrame>0</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>false</IsLoop>
+				  </Value>
+			  </Item>
+			  <Item>
+				  <Key>WorldFaceFront</Key>
+				  <Value>
+					  <StartingFrame>1</StartingFrame>
+					  <EndingFrame>1</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>false</IsLoop>
+				  </Value>
+			  </Item>
+			  <Item>
+				  <Key>WorldFaceLeft</Key>
+				  <Value>
+					  <StartingFrame>2</StartingFrame>
+					  <EndingFrame>2</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>false</IsLoop>
+				  </Value>
+			  </Item>
+			  <Item>
+				  <Key>WorldFaceRight</Key>
+				  <Value>
+					  <StartingFrame>2</StartingFrame>
+					  <EndingFrame>2</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>false</IsLoop>
+				  </Value>
+			  </Item>
+			  <Item>
+				  <Key>WorldWalkBack</Key>
+				  <Value>
+					  <StartingFrame>4</StartingFrame>
+					  <EndingFrame>7</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>true</IsLoop>
+				  </Value>
+			  </Item>
+			  <Item>
+				  <Key>WorldWalkFront</Key>
+				  <Value>
+					  <StartingFrame>8</StartingFrame>
+					  <EndingFrame>11</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>true</IsLoop>
+				  </Value>
+			  </Item>
+			  <Item>
+				  <Key>WorldWalkLeft</Key>
+				  <Value>
+					  <StartingFrame>12</StartingFrame>
+					  <EndingFrame>15</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>true</IsLoop>
+				  </Value>
+			  </Item>
+			  <Item>
+				  <Key>WorldWalkRight</Key>
+				  <Value>
+					  <StartingFrame>12</StartingFrame>
+					  <EndingFrame>15</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>true</IsLoop>
+				  </Value>
+			  </Item>
+			  <Item>
+				  <Key>BattleFaceBack</Key>
+				  <Value>
+					  <StartingFrame>0</StartingFrame>
+					  <EndingFrame>0</EndingFrame>
+					  <Interval>0</Interval>
+					  <IsLoop>true</IsLoop>
+				  </Value>
+			  </Item>
+		  </Sprites>
+	</Sprite>
+	  <Moves>true</Moves>
+	  <MaxRadius>5</MaxRadius>
+	  <DialogText>
+		  <Item>
+			  <Dialog>I am speaking about this game and testing the dialog!  I am just a wandering NPC going around the map.</Dialog>
+		  </Item>
+		  <Item>
+			  <Speaker>Player</Speaker>
+			  <Dialog>Where are you going to walk to next?</Dialog>
+		  </Item>
+		  <Item>
+			  <Dialog>Who knows!  I'll maybe run into that tree over there or into that cave or run around the grass field.</Dialog>
+		  </Item>
+		  <Item>
+			  <Speaker>Player</Speaker>
+			  <Dialog>Have fun...</Dialog>
+		  </Item>
+	  </DialogText>
+	  <RestrictedPositions />
+	  <IsMerchant>false</IsMerchant>
+  </Asset>
+</XnaContent>

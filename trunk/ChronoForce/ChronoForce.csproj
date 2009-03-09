@@ -76,6 +76,7 @@
     <Compile Include="Screens\BattleMenuEntry.cs" />
     <Compile Include="Screens\BattleMenuScreen.cs" />
     <Compile Include="Screens\BattleScreen.cs" />
+    <Compile Include="Screens\StatusMenuScreen.cs" />
     <Compile Include="Screens\MapTitleScreen.cs" />
     <Compile Include="Screens\GameOverScreen.cs" />
     <Compile Include="Screens\DialogBoxScreen.cs" />
